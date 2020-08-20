@@ -1,0 +1,6 @@
+# Do not stage nor committ content of these folders or files on Github
+
+# Folders
+test2/
+train/
+val/
