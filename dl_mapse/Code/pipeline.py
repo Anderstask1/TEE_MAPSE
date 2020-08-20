@@ -151,8 +151,12 @@ def main():
         raw_file = h5py.File(file_path, 'r')
 
         #read the tissue images and transpose the coordinates
-        sequence = np.array(raw_file['tissue']['data'])
-        sequence = np.transpose(sequence, (2,1,0))
+        # sequence = np.array(raw_file['tissue']['data'])
+        # sequence = np.transpose(sequence, (2,1,0))
+
+        # new image data format
+        sequence = np.array(raw_file['images'])
+
         if usePal == True:
             sequence = pal[sequence.astype(int)]
 
