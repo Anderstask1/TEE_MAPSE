@@ -1,6 +1,6 @@
 # TEE_MAPSE
 
-Project thesis at Cybernetics and Robotics at NTNU, in collaboration with The Operating Room of the Future (FOR) at St. Olavs. The thesis is a continuitation of the corresponding project on 2D data, with Trym Nordal as initial developer.
+Project thesis at Cybernetics and Robotics at NTNU, in collaboration with The Operating Room of the Future (FOR) at St. Olavs. The thesis is a continuation of the corresponding project on 2D data, with Trym Nordal as initial developer.
 
 Supervisor: Hans Torp
 Supervisor at FOR: Gabriel Kiss
