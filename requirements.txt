@@ -1,0 +1,65 @@
+appdirs==1.4.4
+args==0.1.0
+bitarray==1.2.1
+brotlipy==0.7.0
+certifi==2020.6.20
+cffi==1.11.5
+chardet==3.0.4
+click==6.7
+clint==0.5.1
+configparser==5.0.0
+contextlib2==0.6.0.post1
+cparse==0.0.2
+cryptography @ file:///home/conda/feedstock_root/build_artifacts/cryptography_1595348781483/work
+cycler==0.10.0
+datasketch==1.5.0
+decorator==4.4.2
+floyd-cli==0.11.17
+h5py==2.8.0
+idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1593328102638/work
+imagecodecs==2020.2.18
+joblib==0.15.1
+kiwisolver==1.2.0
+libMHCUDA==2.1.0
+llvmlite==0.32.1
+marshmallow==2.20.5
+matplotlib==3.2.1
+mkl-fft==1.1.0
+mkl-random==1.1.1
+mkl-service==2.3.0
+NearPy==1.0.0
+networkx==2.4
+numba==0.49.1
+numpy==1.18.5
+olefile==0.46
+packaging==20.3
+pandas==1.0.3
+pathlib2==2.3.5
+Pillow @ file:///tmp/build/80754af9/pillow_1594307298074/work
+pooch==1.1.0
+pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1593275161868/work
+pydecorator==1.0
+pyOpenSSL==19.1.0
+pyparsing==2.4.7
+PySocks==1.7.1
+python-dateutil==2.8.1
+pytz==2020.1
+PyWavelets==1.1.1
+PyYAML==5.3.1
+raven==6.10.0
+requests @ file:///home/conda/feedstock_root/build_artifacts/requests_1592425495151/work
+requests-toolbelt==0.9.1
+scikit-image==0.17.1
+scikit-learn==0.23.1
+scipy==1.4.1
+seaborn==0.10.1
+six==1.15.0
+tabulate==0.8.7
+tbb==2020.0.133
+threadpoolctl==2.1.0
+tifffile==2020.5.11
+torch==1.5.0
+torchvision==0.6.0
+tornado==6.0.4
+umap-learn==0.4.4
+urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1595434816409/work
