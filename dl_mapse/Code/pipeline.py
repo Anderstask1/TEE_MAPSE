@@ -104,11 +104,18 @@ def main():
     #model_path = "d:/dl/MAPSE//Data/output/best_true_weights.pth"
 
     # Edit these paths
-    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test2"
-    model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
+    ## Run locally
+    #file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test2"
+    #model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
+    #pal_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt"
+
+    ## Run on FloydHub
+    file_dir = "anderstask1/datasets/testing_data"
+    model_path = "anderstask1/datasets/pytorch_models/best_true_weights_Mapse_length1.pth"
+    pal_path = "anderstask1/datasets/pal_text_file/pal.txt"
+
     model_seq_len = 1
     usePal = False
-
 
     eps = 1e-10
 
@@ -138,10 +145,9 @@ def main():
     pipeline = Pipeline(preprocess,landmark_detector,postprocess)
 
     #read pal
-    pal_txt = open('/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt')
+    pal_txt = open(pal_path)
     line = pal_txt.readline()[:-1]
     pal = np.array([float(val) for val in line.split(',')])
-
 
     for i, file in enumerate(processFiles):
         print("File {}/{}".format(i+1, len(processFiles)))

@@ -240,7 +240,7 @@ class Rotation(object):
             if np.isnan(y).all():
                 #raise Exception('NAN in before rotation')
                 rotated_coordinates = coordinates
-            else: 
+            else:
                 x_nnan = x[~np.isnan(x)]
                 y_nnan = y[~np.isnan(y)]
 
