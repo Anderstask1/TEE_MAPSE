@@ -105,14 +105,14 @@ def main():
 
     # Edit these paths
     ## Run locally
-    #file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test2"
-    #model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
-    #pal_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt"
+    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated"
+    model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
+    pal_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt"
 
     ## Run on FloydHub
-    file_dir = "anderstask1/datasets/testing_data"
-    model_path = "anderstask1/datasets/pytorch_models/best_true_weights_Mapse_length1.pth"
-    pal_path = "anderstask1/datasets/pal_text_file/pal.txt"
+    #file_dir = "anderstask1/datasets/testing_data"
+    #model_path = "anderstask1/datasets/pytorch_models/best_true_weights_Mapse_length1.pth"
+    #pal_path = "anderstask1/datasets/pal_text_file/pal.txt"
 
     model_seq_len = 1
     usePal = False
@@ -129,11 +129,19 @@ def main():
     processFiles.sort()
     print(processFiles)
 
-    #load the model
+    # Use cpu as processing unit
     device = torch.device("cpu")
+
+    #load the model
     model = models.Model(model_seq_len)
+
+    # Load model parameters from state dictionary
     model.load_state_dict(torch.load(model_path, map_location='cpu')['model_state_dict'])
+
+    # Set processing unit
     model = model.to(device)
+
+    # Turn off layers specific for training, since evaluating here
     model.eval()
     torch.set_grad_enabled(False)
 
@@ -149,6 +157,7 @@ def main():
     line = pal_txt.readline()[:-1]
     pal = np.array([float(val) for val in line.split(',')])
 
+    #iterate through .h5 files in dir
     for i, file in enumerate(processFiles):
         print("File {}/{}".format(i+1, len(processFiles)))
         file_path = os.path.join(file_dir, file)
@@ -168,7 +177,7 @@ def main():
         if usePal == True:
             sequence = pal[sequence.astype(int)]
 
-        #rund the pipeline
+        #run the pipeline
         ret_cor, left_movement, right_movement = pipeline(sequence)
 
         #print debug info
@@ -199,6 +208,5 @@ def main():
             'MAPSE_right_movement', data=right_movement['y_complete'])
 
         raw_file.close()
-
 
 main()
