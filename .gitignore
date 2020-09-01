@@ -6,3 +6,4 @@ train/
 val/
 dl_mapse/Data
 test_rotated/
+*.h5
