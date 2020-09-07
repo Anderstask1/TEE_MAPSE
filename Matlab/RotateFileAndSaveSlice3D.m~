@@ -30,7 +30,7 @@ function RotateFileAndSaveSlice3D(inputName, outName, angle, visualDebug)
     %matrix of 2d slices for sequence
     %allocate
     imageData = data.CartesianVolumes.('vol01');
-    slices = zeros(frameNo, size(imageData, 2), size(imageData, 3));   
+    slices = zeros(size(imageData, 1), size(imageData, 2), frameNo);   
  
     for f = 1:frameNo
         %get the 3D frame
@@ -42,7 +42,7 @@ function RotateFileAndSaveSlice3D(inputName, outName, angle, visualDebug)
         data.CartesianVolumes.(volName) = processedData;
         
         %get slize from 3D frame
-        slices(f,:,:) = squeeze(processedData(round(end*0.5),:,:));
+        slices(:,:,f) = squeeze(processedData(round(end*0.5),:,:));
     end
    
     %save slice sequence to .h5 file
