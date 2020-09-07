@@ -18,7 +18,7 @@ for f=1:size(fileNames,2)
     % Rotate 180 degrees with 5 degree step
     for i = 0:5:180
         %show progress
-        disp(['Extracting slice for angle:', i])
+        print('Extracting slice for angle')
         
         %new filename
         outName = strcat(rootName,'.h5')

@@ -99,20 +99,19 @@ class LandmarkDetector(object):
 
 
 def main():
+    # Toggle run locally - run on FloydHub
+    isRunningLocally = false
 
-    #file_dir = "d:/dl/MAPSE/Data/test"
-    #model_path = "d:/dl/MAPSE//Data/output/best_true_weights.pth"
-
-    # Edit these paths
-    ## Run locally
-    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated"
-    model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
-    pal_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt"
-
-    ## Run on FloydHub
-    #file_dir = "anderstask1/datasets/testing_data"
-    #model_path = "anderstask1/datasets/pytorch_models/best_true_weights_Mapse_length1.pth"
-    #pal_path = "anderstask1/datasets/pal_text_file/pal.txt"
+    if isRunningLocally:
+        ## Run locally
+        file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
+        pal_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt"
+    else:
+        ## Run on FloydHub
+        file_dir = "/testing_data"
+        model_path = "/pytorch_models/best_true_weights_Mapse_length1.pth"
+        pal_path = "/pal_text_file/pal.txt"
 
     model_seq_len = 1
     usePal = False
