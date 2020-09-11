@@ -11,15 +11,15 @@ fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
 
 %call the split script for each file
 for f=1:size(fileNames,2)
-    %show progress
-    fprintf('Loaded file with name: %s. \n',i)
-    
     %root name from h5 file
     [path, name, ext] = fileparts(fileNames(f).name);
     rootName = [path '/' name];
+    
+    %show progress
+    fprintf('Loaded file with name: %s. \n', name);
 
     % Rotate 180 degrees with 5 degree step
-    for i = 0:5:180
+    for i = 0:10:180
         %show progress
         fprintf('Extracting slice that is rotated %d degrees. \n',i)
         

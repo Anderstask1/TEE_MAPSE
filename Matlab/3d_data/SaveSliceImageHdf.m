@@ -5,7 +5,7 @@ function SaveSliceImageHdf()
 
     filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated/';
     
-    hdfFileName = 'J44J71A4';
+    hdfFileName = 'J65BP22M';
 
     %load data
     fileName = strcat(hdfFileName,'.h5'); 

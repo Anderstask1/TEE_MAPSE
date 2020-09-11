@@ -14,7 +14,7 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
     
     %translation, move rotation point to origin
     %rotation point in midle of y and z axis
-    translateM = [
+    translateM_x = [
           1 0 0 0
           0 1 0 -sz(2)/2
           0 0 1 -sz(3)/2
@@ -22,26 +22,26 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
         ];
     
     %rotation point in midle of x and z axis
-%     translateM = [
-%           1 0 0 -sz(1)/2
-%           0 1 0 0
-%           0 0 1 -sz(3)/2
-%           0 0 0 1
-%         ];
+    translateM_y = [
+          1 0 0 -sz(1)/2
+          0 1 0 0
+          0 0 1 -sz(3)/2
+          0 0 0 1
+        ];
 %     
     %rotation point in midle of x and y axis
-%     translateM = [
-%           1 0 0 -sz(1)/2
-%           0 1 0 -sz(2)/2
-%           0 0 1 0
-%           0 0 0 1
-%         ];
+    translateM_z = [
+          1 0 0 -sz(1)/2
+          0 1 0 -sz(2)/2
+          0 0 1 0
+          0 0 0 1
+        ];
     
     %rotation
     theta = deg2rad(angle);
 
     %rotate around x axis by theta
-    rotateM = [
+    rotateM_x = [
          1  0           0            0
          0  cos(theta)  -sin(theta)  0  
          0  sin(theta)  cos(theta)   0  
@@ -49,35 +49,35 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
          ];
 
      %rotate around y axis by theta
-%      rotateM = [
-%          cos(theta)  0  sin(theta)  0
-%          0           1  0           0
-%          -sin(theta) 0  cos(theta)  0  
-%          0           0  0           1
-%          ];
+     rotateM_y = [
+         cos(theta)  0  sin(theta)  0
+         0           1  0           0
+         -sin(theta) 0  cos(theta)  0  
+         0           0  0           1
+         ];
      
      %rotate around z axis by theta
-%      rotateM = [
-%          cos(theta)  -sin(theta) 0  0
-%          sin(theta)  cos(theta)  0  0
-%          0           0           1  0
-%          0           0           0  1
-%          ];
-     
+     rotateM_z = [
+         cos(theta)  -sin(theta) 0  0
+         sin(theta)  cos(theta)  0  0
+         0           0           1  0
+         0           0           0  1
+         ];
+    
     %rotation around an arbitrary point = moving rotation point to origin,
     %rotation around origin and moving back to original position
-    trf = inv(translateM)*rotateM*translateM; 
+    trf = inv(translateM_z)*rotateM_x*translateM_z; 
     tform = affine3d(trf');
     
     %matrix of 2d slices for sequence
     %allocate
     imageData = data.CartesianVolumes.('vol01');
     slices = zeros(size(imageData, 2), size(imageData, 3), frameNo);   
- 
+    
     for f = 1:frameNo
         %get the 3D frame
         volName = sprintf('vol%02d', f);
-        imageData = data.CartesianVolumes.(volName);   
+        imageData = data.CartesianVolumes.(volName);
 
         %rotate volume
         processedData = uint8(imwarp(imageData, tform, 'OutputView',boundingBox));
