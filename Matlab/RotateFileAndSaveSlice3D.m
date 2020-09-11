@@ -1,7 +1,7 @@
 %rotate a 3D ultrasound h5 file along the probe axis by a predefined
 %amount, and save slice of 3d volume in sequence array
 %Started 31.08.2020, Anders Tasken 
-function RotateFileAndSaveSlice3D(inputName, outName, angle, visualDebug)
+function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
     %load data
     data = HdfImport(inputName);
 
@@ -88,8 +88,8 @@ function RotateFileAndSaveSlice3D(inputName, outName, angle, visualDebug)
     end
    
     %save slice sequence to .h5 file
-    fieldName = strcat('rotated_by_', int2str(angle));
-    data.RotatedVolumes.(fieldName) = slices;
+    fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
+    data.RotatedVolumes.(fieldName).images = slices;
     
     %plot if enabled
     if visualDebug
@@ -100,5 +100,8 @@ function RotateFileAndSaveSlice3D(inputName, outName, angle, visualDebug)
         
         subplot(2,1,1), imshow(slice, [0 255])
     end         
+    
+    %new filename
+    outName = strcat(inputName,'.h5');
     
     HdfExport(outName, data);

@@ -18,17 +18,14 @@ xlsfile = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test2/MAPSE_dl_len3.
 %find all dcm files
 fileNamesMapse = parseDirectoryLinux(dirInMAPSE, 1, '.h5');
 
-%create folder for images and videos
-directoryPath = strcat(dirInMAPSE, 'PostProcessMapseRecordings/');
-mkdir(directoryPath);
 
 %call the MAPSE postprocessing script for each file
 for f=1:size(fileNamesMapse,2)
     %root name from h5 file
     [path, name, ext] = fileparts(fileNamesMapse(f).name);
-    
+
     %post process the file
-    PostProcessMapseRecording3D(name, path, directoryPath, xlsfile, 1, 1, 0); % save movie and figure, no xls on linux
+    PostProcessMapseRecording3D(names, path, xlsfile, 1, 1, 0); % save movie and figure, no xls on linux
 end
 
 

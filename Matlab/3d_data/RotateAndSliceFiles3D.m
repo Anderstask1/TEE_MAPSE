@@ -4,13 +4,16 @@
 %Author: Anders Tasken
 function RotateAndSliceFiles3D()
 
-filesPath = '/home/anderstask1/Documents/Kyb/Thesis/3d_ultrasound_data/3d_rotated_and_slized_ultrasounds_data_test';
+filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated/';
 
 %find all .h5 files
 fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
 
 %call the split script for each file
 for f=1:size(fileNames,2)
+    %show progress
+    fprintf('Loaded file with name: %s. \n',i)
+    
     %root name from h5 file
     [path, name, ext] = fileparts(fileNames(f).name);
     rootName = [path '/' name];
@@ -20,10 +23,7 @@ for f=1:size(fileNames,2)
         %show progress
         fprintf('Extracting slice that is rotated %d degrees. \n',i)
         
-        %new filename
-        outName = strcat(rootName,'.h5');
-        
         %rotate 3d data
-        RotateFileAndSaveSlice3D(rootName, outName, i, 0);
+        RotateFileAndSaveSlice3D(rootName, i, 0);
     end
 end
