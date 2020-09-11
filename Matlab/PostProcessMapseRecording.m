@@ -18,7 +18,7 @@ hdfdata = HdfImport([rootName '.h5']);
 %if this is isotropic (as is by default) should simplify some computations later
 pixelSize = 4.0E-4.* ones(55,1);
 
-imageData = hdfdata.images;
+imageData = hdfdata.rotated_by_0;
 imageTimes = [1:size(imageData,3)];
 
 mapseLandmarks = hdfdata.MAPSE_detected_landmarks';
