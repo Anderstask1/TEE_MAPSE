@@ -100,7 +100,7 @@ class LandmarkDetector(object):
 
 def main():
     # Toggle run locally - run on FloydHub
-    isRunningLocally = false
+    isRunningLocally = True
 
     if isRunningLocally:
         ## Run locally
@@ -171,7 +171,7 @@ def main():
         # sequence = np.transpose(sequence, (2,1,0))
 
         # new image data format
-        sequence = np.array(raw_file['images'])
+        sequence = np.array(raw_file['rotated_by_0'])
 
         if usePal == True:
             sequence = pal[sequence.astype(int)]

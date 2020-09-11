@@ -18,10 +18,10 @@ for f=1:size(fileNames,2)
     % Rotate 180 degrees with 5 degree step
     for i = 0:5:180
         %show progress
-        disp(['Extracting slice for angle:', i])
+        fprintf('Extracting slice that is rotated %d degrees. \n',i)
         
         %new filename
-        outName = strcat(rootName,'.h5')
+        outName = strcat(rootName,'.h5');
         
         %rotate 3d data
         RotateFileAndSaveSlice3D(rootName, outName, i, 0);

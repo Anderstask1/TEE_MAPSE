@@ -1,4 +1,4 @@
-% Plot sliced 2d TEE data from hdf-file, only 1 image per sequence
+%Plot sliced 2d TEE data from hdf-file, only 1 image per sequence
 %Started 04.09.2020
 %Author: Anders Tasken
 function SaveSliceImageHdf()
@@ -12,7 +12,7 @@ function SaveSliceImageHdf()
     data = HdfImport(filePath);
     
     %get all fields from data struct
-    fields = fieldnames(data);
+    fields = fieldnames(data.RotatedVolumes);
     
     %iterate over all fields
     for i = 1 : numel(fields)
@@ -21,10 +21,10 @@ function SaveSliceImageHdf()
         if contains(fields(i), 'rotated_by_')
             
             %get field data
-            fieldData = data.(fields{i});
+            fieldData = data.RotatedVolumes.(fields{i});
             
-            %get image
-            slice = fieldData(1,:,:);
+            %get image, remove dimension of length 1
+            slice = squeeze(fieldData(:,:,1));
      
             fileName = strcat(filesPath,string(fields(i)),'.png');
             
