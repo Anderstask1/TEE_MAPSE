@@ -170,41 +170,45 @@ def main():
         # sequence = np.array(raw_file['tissue']['data'])
         # sequence = np.transpose(sequence, (2,1,0))
 
-        # new image data format
-        sequence = np.array(raw_file['images'])
+        #iterate through all rotations
+        for rotated_field in raw_file['RotatedVolumes']:
+            print(rotated_field)
 
-        if usePal == True:
-            sequence = pal[sequence.astype(int)]
+            # new image data format
+            sequence = np.array(raw_file['RotatedVolumes'][rotated_field]['images'])
 
-        #run the pipeline
-        ret_cor, left_movement, right_movement = pipeline(sequence)
+            if usePal == True:
+                sequence = pal[sequence.astype(int)]
 
-        #print debug info
-        print(left_movement)
-        print(right_movement)
+            #run the pipeline
+            ret_cor, left_movement, right_movement = pipeline(sequence)
 
         raw_file.close()
 
         #write out the detected landmarks and their movement
         raw_file = h5py.File(file_path, 'a')
 
-        #get the hdf keys
-        h5_keys = raw_file.keys()
+        # iterate through all rotations
+        for rotated_field in raw_file['RotatedVolumes']:
+            print(rotated_field)
 
-        #update the MAPSE related fields
-        if '/MAPSE_detected_landmarks' in h5_keys:
-            del raw_file['MAPSE_detected_landmarks']
-        raw_file.create_dataset('MAPSE_detected_landmarks', data=ret_cor)
+            #get the hdf keys
+            h5_keys = raw_file['RotatedVolumes'][rotated_field].keys()
 
-        if '/MAPSE_left_movement' in h5_keys:
-            del raw_file['MAPSE_left_movement']
-        raw_file.create_dataset(
-            'MAPSE_left_movement', data=left_movement['y_complete'])
+            #update the MAPSE related fields
+            if '/MAPSE_detected_landmarks' in h5_keys:
+                del raw_file['RotatedVolumes'][rotated_field]['MAPSE_detected_landmarks']
+            raw_file['RotatedVolumes'][rotated_field].create_dataset('MAPSE_detected_landmarks', data=ret_cor)
 
-        if '/MAPSE_right_movement' in h5_keys:
-            del raw_file['MAPSE_right_movement']
-        raw_file.create_dataset(
-            'MAPSE_right_movement', data=right_movement['y_complete'])
+            if '/MAPSE_left_movement' in h5_keys:
+                del raw_file['RotatedVolumes'][rotated_field]['MAPSE_left_movement']
+            raw_file['RotatedVolumes'][rotated_field].create_dataset(
+                'MAPSE_left_movement', data=left_movement['y_complete'])
+
+            if '/MAPSE_right_movement' in h5_keys:
+                del raw_file['RotatedVolumes'][rotated_field]['MAPSE_right_movement']
+            raw_file['RotatedVolumes'][rotated_field].create_dataset(
+                'MAPSE_right_movement', data=right_movement['y_complete'])
 
         raw_file.close()
 

@@ -12,10 +12,6 @@ function SaveSliceImageHdf()
     filePath = strcat(filesPath, fileName);
     data = HdfImport(filePath);
     
-    %create folder for images
-    directoryPath = strcat(filesPath, '/SlicedImages/');
-    mkdir(directoryPath);
-    
     %get all fields from data struct
     fields = fieldnames(data.RotatedVolumes);
     
@@ -27,6 +23,10 @@ function SaveSliceImageHdf()
 
         %get image, remove dimension of length 1
         slice = squeeze(fieldData(:,:,1));
+
+        %create folder for images
+        directoryPath = strcat(filesPath, '/SlicedImages/');
+        mkdir(directoryPath);
         
         %save image
         fileName = strcat(directoryPath,hdfFileName,'_',string(fields(i)),'.png');
