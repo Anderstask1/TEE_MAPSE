@@ -21,10 +21,10 @@ for s = 1:sz(3)
     
     %plot landmarks (left and right)
     if ~isnan(mapseLandmarks(s,1))
-        plot(mapseLandmarks(s,1), mapseLandmarks(s,2), 'gx', 'LineWidth', 2)
+        plot(mapseLandmarks(s,1), mapseLandmarks(s,2), 'gx', 'LineWidth', 2);
     end
     if ~isnan(mapseLandmarks(s,3))
-        plot(mapseLandmarks(s,3), mapseLandmarks(s,4), 'bx', 'LineWidth', 2)
+        plot(mapseLandmarks(s,3), mapseLandmarks(s,4), 'bx', 'LineWidth', 2);
     end
     
     hold off
