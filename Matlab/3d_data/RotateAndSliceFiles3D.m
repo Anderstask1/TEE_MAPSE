@@ -18,8 +18,8 @@ for f=1:size(fileNames,2)
     %show progress
     fprintf('Loaded file with name: %s. \n', name);
 
-    % Rotate 180 degrees with 5 degree step
-    for i = 0:10:180
+    % Rotate from 60 degrees to 120 degrees (since 3d scan is within this range), with 5 degree step
+    for i = 60:1:120
         %show progress
         fprintf('Extracting slice that is rotated %d degrees. \n',i)
         

@@ -8,7 +8,6 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
     %number of frames
     frameNo = length(fieldnames(data.CartesianVolumes));
 
-    %volumetric data
     vol1 = data.CartesianVolumes.vol01;
     boundingBox = imref3d(size(vol1));
     sz =size(vol1);
@@ -38,8 +37,8 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
           0 0 0 1
         ];
     
-    %rotation, rotate 90 degrees in opposite direction first
-    theta = deg2rad(angle-90);
+    %rotation
+    theta = deg2rad(angle);
 
     %rotate around x axis by theta
     rotateM_x = [
@@ -73,7 +72,7 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
     %matrix of 2d slices for sequence
     %allocate
     imageData = data.CartesianVolumes.('vol01');
-    slices = zeros(size(imageData, 2), size(imageData, 3), frameNo);   
+    slices = zeros(size(imageData, 1), size(imageData, 3), frameNo);   
     
     for f = 1:frameNo
         %get the 3D frame
@@ -82,18 +81,12 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
 
         %rotate volume
         processedData = uint8(imwarp(imageData, tform, 'OutputView',boundingBox));
+        data.CartesianVolumes.(volName) = processedData;
         
         %get slize from 3D frame
         slices(:,:,f) = squeeze(processedData(:,round(end*0.5),:));
     end
    
-    %delete field if there from beforehand
-    if angle == 60
-        if isfield(data, 'RotatedVolumes')
-            data = rmfield(data, 'RotatedVolumes');
-        end
-    end
-        
     %save slice sequence to .h5 file
     fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
     data.RotatedVolumes.(fieldName).images = slices;
