@@ -7,7 +7,7 @@
 %%Author: G. Kiss  02.2011
 %Modified by Anders Tasken for Linux
 
-function fileNames = parseDirectory (directoryName, recursive, filetype, ending)
+function fileNames = parseDirectoryLinux (directoryName, recursive, filetype, ending)
 
 %build the filename list
 files = dir(directoryName);
