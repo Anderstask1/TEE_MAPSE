@@ -38,6 +38,14 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
           0 0 0 1
         ];
     
+    %rotation around center of mitral valve (move origin to expected center of valve)
+    translateM_mitral = [
+          1 0 0 -sz(1)*0.561
+          0 1 0 -sz(2)*0.561
+          0 0 1 sz(3)*0.318
+          0 0 0 1
+        ];
+    
     %rotation, rotate 90 degrees in opposite direction first
     theta = deg2rad(angle-90);
 
@@ -73,7 +81,7 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
     %matrix of 2d slices for sequence
     %allocate
     imageData = data.CartesianVolumes.('vol01');
-    slices = zeros(size(imageData, 2), size(imageData, 3), frameNo);   
+    slices = zeros(size(imageData, 1), size(imageData, 3), frameNo);   
     
     for f = 1:frameNo
         %get the 3D frame

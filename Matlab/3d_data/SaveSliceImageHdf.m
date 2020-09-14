@@ -35,7 +35,7 @@ function SaveSliceImageHdf()
             fieldData = data.RotatedVolumes.(fields{i}).images;
 
             %get image, remove dimension of length 1
-            slice = squeeze(fieldData(:,:,11));
+            slice = squeeze(fieldData(:,:,1));
 
             %save image
             fileName = strcat(directoryPath,name,'_',string(fields(i)),'.png');
