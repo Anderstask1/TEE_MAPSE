@@ -78,6 +78,19 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
     trf = inv(translateM_z)*rotateM_y*translateM_z; 
     tform = affine3d(trf');
     
+    %rotate around z-axis in order to align heart data with coordinate
+    %system
+    theta_align = deg2rad(10);
+    rotateM_z_align = [
+         cos(theta_align)  -sin(theta_align) 0  0
+         sin(theta_align)  cos(theta_align)  0  0
+         0                 0                 1  0
+         0                 0                 0  1
+         ];
+    
+    trf_align = inv(translateM_z)*rotateM_z_align*translateM_z; 
+    tform_align = affine3d(trf_align');
+     
     %matrix of 2d slices for sequence
     %allocate
     imageData = data.CartesianVolumes.('vol01');
@@ -88,13 +101,16 @@ function RotateFileAndSaveSlice3D(inputName, angle, visualDebug)
         volName = sprintf('vol%02d', f);
         imageData = data.CartesianVolumes.(volName);
 
+        %align volume
+        %processedData = uint8(imwarp(imageData, tform_align, 'OutputView',boundingBox));
+        
         %rotate volume
         processedData = uint8(imwarp(imageData, tform, 'OutputView',boundingBox));
         
         %get slize from 3D frame
         slices(:,:,f) = squeeze(processedData(:,round(end*0.5),:));
     end
-   
+  
     %delete field if there from beforehand
     if angle == 60
         if isfield(data, 'RotatedVolumes')
