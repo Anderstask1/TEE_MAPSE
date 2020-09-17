@@ -1,7 +1,7 @@
 %rotate a 3D ultrasound h5 file along the probe axis by a predefined
 %amount, and save slice of 3d volume in sequence array
 %Started 31.08.2020, Anders Tasken 
-function RotateVolumeMVCenter3D(inputName, angle, visualDebug)
+function RotateVolumeYAxis3D(inputName, angle, visualDebug)
     %load data
     data = HdfImport(inputName);
 
@@ -12,17 +12,50 @@ function RotateVolumeMVCenter3D(inputName, angle, visualDebug)
     vol1 = data.CartesianVolumes.vol01;
     boundingBox = imref3d(size(vol1));
     sz =size(vol1);
-   
+    
+    %translation, move rotation point to origin
+    %rotation point in midle of y and z axis
+    translateM_x = [
+          1 0 0 0
+          0 1 0 -sz(2)/2
+          0 0 1 -sz(3)/2
+          0 0 0 1
+        ];
+    
+    %rotation point in midle of x and z axis
+    translateM_y = [
+          1 0 0 -sz(1)/2
+          0 1 0 0
+          0 0 1 -sz(3)/2
+          0 0 0 1
+        ];
+%     
     %rotation point in midle of x and y axis
     translateM_z = [
-          1 0 0 sz(1)/2
-          0 1 0 sz(2)/2
+          1 0 0 -sz(1)/2
+          0 1 0 -sz(2)/2
           0 0 1 0
           0 0 0 1
         ];
     
-    %rotation (rotate 90 degrees in opposite direction first)
+    %rotation around center of mitral valve (move origin to expected center of valve)
+    translateM_mitral = [
+          1 0 0 -sz(1)*0.561
+          0 1 0 -sz(2)*0.561
+          0 0 1 sz(3)*0.318
+          0 0 0 1
+        ];
+    
+    %rotation, rotate 90 degrees in opposite direction first
     theta = deg2rad(angle-90);
+
+    %rotate around x axis by theta
+    rotateM_x = [
+         1  0           0            0
+         0  cos(theta)  -sin(theta)  0  
+         0  sin(theta)  cos(theta)   0  
+         0  0           0            1
+         ];
 
      %rotate around y axis by theta
      rotateM_y = [
@@ -31,36 +64,32 @@ function RotateVolumeMVCenter3D(inputName, angle, visualDebug)
          -sin(theta) 0  cos(theta)  0  
          0           0  0           1
          ];
+     
+     %rotate around z axis by theta
+     rotateM_z = [
+         cos(theta)  -sin(theta) 0  0
+         sin(theta)  cos(theta)  0  0
+         0           0           1  0
+         0           0           0  1
+         ];
     
     %rotation around an arbitrary point = moving rotation point to origin,
     %rotation around origin and moving back to original position
-    trf = translateM_z*rotateM_y*inv(translateM_z); 
+    trf = inv(translateM_z)*rotateM_y*translateM_z; 
     tform = affine3d(trf');
     
-    %rotate around line from center of MV to probe center
-    rotateM_line = [
-         cos(theta)  -sin(theta)    0  0
-         sin(theta)  cos(theta)     0  0
-         0           0              1  0  
-         0           0              0  1
+    %rotate around z-axis in order to align heart data with coordinate
+    %system
+    theta_align = deg2rad(10);
+    rotateM_z_align = [
+         cos(theta_align)  -sin(theta_align) 0  0
+         sin(theta_align)  cos(theta_align)  0  0
+         0                 0                 1  0
+         0                 0                 0  1
          ];
     
-    rotateM_line_x = [
-         1  0        0       0
-         0  0.9725   -0.2329 0
-         0  0.2329   0.9725  0  
-         0  0        0       1
-         ];
-     
-    rotateM_line_y = [
-         0.9845  0   0.1753  0
-         0  	 1   0       0
-         -0.1753 0   0.9845  0  
-         0       0   0       1
-         ];
-     
-    trf_line = translateM_z*inv(rotateM_line_x)*rotateM_line_y*rotateM_line*rotateM_line_x*inv(rotateM_line_y)*inv(translateM_z); 
-    tform_line = affine3d(trf_line');
+    trf_align = inv(translateM_z)*rotateM_z_align*translateM_z; 
+    tform_align = affine3d(trf_align');
      
     %matrix of 2d slices for sequence
     %allocate
@@ -71,16 +100,19 @@ function RotateVolumeMVCenter3D(inputName, angle, visualDebug)
         %get the 3D frame
         volName = sprintf('vol%02d', f);
         imageData = data.CartesianVolumes.(volName);
+
+        %align volume
+        %processedData = uint8(imwarp(imageData, tform_align, 'OutputView',boundingBox));
         
         %rotate volume
-        processedData = uint8(imwarp(imageData, tform_line, 'OutputView',boundingBox));
+        processedData = uint8(imwarp(imageData, tform, 'OutputView',boundingBox));
         
         %get slize from 3D frame
         slices(:,:,f) = squeeze(processedData(:,round(end*0.5),:));
     end
   
     %delete field if there from beforehand
-    if angle == 0
+    if angle == 60
         if isfield(data, 'RotatedVolumes')
             data = rmfield(data, 'RotatedVolumes');
         end
