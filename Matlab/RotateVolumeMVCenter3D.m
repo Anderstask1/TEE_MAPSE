@@ -1,7 +1,7 @@
 %rotate a 3D ultrasound h5 file along the probe axis by a predefined
 %amount, and save slice of 3d volume in sequence array
 %Started 31.08.2020, Anders Tasken 
-function RotateVolumeMVCenter3D(inputName, angle, visualDebug)
+function RotateFileAndSaveSlice3D(inputName, angle, rotationPoint,visualDebug)
     %load data
     data = HdfImport(inputName);
 
@@ -13,54 +13,29 @@ function RotateVolumeMVCenter3D(inputName, angle, visualDebug)
     boundingBox = imref3d(size(vol1));
     sz =size(vol1);
    
-    %rotation point in midle of x and y axis
+    %rotation point in center of MV
     translateM_z = [
-          1 0 0 sz(1)/2
-          0 1 0 sz(2)/2
-          0 0 1 0
+          1 0 0 rotationPoint(1)
+          0 1 0 rotationPoint(2)
+          0 0 1 rotationPoint(3)
           0 0 0 1
         ];
     
-    %rotation (rotate 90 degrees in opposite direction first)
-    theta = deg2rad(angle-90);
+    %rotation 
+    theta = deg2rad(angle);
 
-     %rotate around y axis by theta
-     rotateM_y = [
-         cos(theta)  0  sin(theta)  0
-         0           1  0           0
-         -sin(theta) 0  cos(theta)  0  
-         0           0  0           1
-         ];
+    %rotate around a line perpendicular to MV
+    rotateM_y = [
+        cos(theta)  0  sin(theta)  0
+        0           1  0           0
+        -sin(theta) 0  cos(theta)  0  
+        0           0  0           1
+        ];
     
     %rotation around an arbitrary point = moving rotation point to origin,
     %rotation around origin and moving back to original position
     trf = translateM_z*rotateM_y*inv(translateM_z); 
     tform = affine3d(trf');
-    
-    %rotate around line from center of MV to probe center
-    rotateM_line = [
-         cos(theta)  -sin(theta)    0  0
-         sin(theta)  cos(theta)     0  0
-         0           0              1  0  
-         0           0              0  1
-         ];
-    
-    rotateM_line_x = [
-         1  0        0       0
-         0  0.9725   -0.2329 0
-         0  0.2329   0.9725  0  
-         0  0        0       1
-         ];
-     
-    rotateM_line_y = [
-         0.9845  0   0.1753  0
-         0  	 1   0       0
-         -0.1753 0   0.9845  0  
-         0       0   0       1
-         ];
-     
-    trf_line = translateM_z*inv(rotateM_line_x)*rotateM_line_y*rotateM_line*rotateM_line_x*inv(rotateM_line_y)*inv(translateM_z); 
-    tform_line = affine3d(trf_line');
      
     %matrix of 2d slices for sequence
     %allocate
@@ -73,7 +48,7 @@ function RotateVolumeMVCenter3D(inputName, angle, visualDebug)
         imageData = data.CartesianVolumes.(volName);
         
         %rotate volume
-        processedData = uint8(imwarp(imageData, tform_line, 'OutputView',boundingBox));
+        processedData = uint8(imwarp(imageData, tform, 'OutputView',boundingBox));
         
         %get slize from 3D frame
         slices(:,:,f) = squeeze(processedData(:,round(end*0.5),:));

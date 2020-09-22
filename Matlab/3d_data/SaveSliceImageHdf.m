@@ -22,17 +22,20 @@ function SaveSliceImageHdf()
         data = HdfImport(filePath);
 
         %create folder for images
-        directoryPath = strcat(filesPath, '/SlicedImages_', name, '/');
+        directoryPath = strcat(filesPath, '/SlicedImages_MVCenter_', name, '/');
+        %directoryPath = strcat(filesPath, '/SlicedImages_', name, '/');
         mkdir(directoryPath);
 
         %get all fields from data struct
-        fields = fieldnames(data.RotatedVolumes);
+        fields = fieldnames(data.MVCenterRotatedVolumes);
+        %fields = fieldnames(data.RotatedVolumes);
 
         %iterate over all fields
         for i = 1 : numel(fields)
 
             %get field data
-            fieldData = data.RotatedVolumes.(fields{i}).images;
+            fieldData = data.MVCenterRotatedVolumes.(fields{i}).images;
+            %fieldData = data.RotatedVolumes.(fields{i}).images;
 
             %get image, remove dimension of length 1
             slice = squeeze(fieldData(:,:,1));
