@@ -5,7 +5,6 @@ clear all
 
 addpath('dirParsing')
 addpath('ecgDetect')
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAPSE processing
 
