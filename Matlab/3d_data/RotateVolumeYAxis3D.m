@@ -41,11 +41,11 @@ function RotateVolumeYAxis3D(path, name, angle, visualDebug)
     tform = affine3d(trf');
     
     %create folder for transformation matrices
-    directoryPath = strcat(path, '/Transformation-matrices/');
+    directoryPath = strcat(path, '/Transformation-matrices_y-axis/');
     mkdir(directoryPath);
     
     %save transformation in order to inverse transform coordinates later
-    trfFileName = strcat(directoryPath,'trf_matrix_y-axis-rotation_by_', int2str(angle),'.mat');
+    trfFileName = strcat(directoryPath,'trf_matrix_y-axis-rotated_by_', int2str(angle),'_degrees.mat');
     save(trfFileName,'trf');
      
     %matrix of 2d slices for sequence

@@ -26,19 +26,19 @@ function PostProcessMapseImage3D(fileName, pathName, directoryPath, xlsfile, sav
         mkdir(directoryPath);
 
         %get all fields from data struct
-        fields = fieldnames(hdfdata.RotatedVolumes);
+        fields = fieldnames(hdfdata.MVCenterRotatedVolumes);
 
         %iterate over all fields
         for i = 1 : numel(fields)
 
             %get field data
-            fieldData = hdfdata.RotatedVolumes.(fields{i}).images;
+            fieldData = hdfdata.MVCenterRotatedVolumes.(fields{i}).images;
 
             %get image from first frame in sequence, remove dimension of length 1
             slice = squeeze(fieldData(:,:,1)');
             
             %get mapse landmarks coordinates
-            mapseLandmarks = hdfdata.RotatedVolumes.(fields{i}).MAPSE_detected_landmarks';
+            mapseLandmarks = hdfdata.MVCenterRotatedVolumes.(fields{i}).MAPSE_detected_landmarks';
             
             imshow(slice, [0 255]);
         
