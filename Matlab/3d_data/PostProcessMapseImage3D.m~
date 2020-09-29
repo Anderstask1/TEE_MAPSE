@@ -22,26 +22,25 @@ function PostProcessMapseImage3D(fileName, pathName, directoryPath, xlsfile, sav
         hdfdata = HdfImport(filePath);
 
         %create folder for images
-        directoryPath = strcat(filesPath, '/PostProcessMapseImage', '/');
+        directoryPath = strcat(filesPath, 'PostProcessMapseImage', '/');
         mkdir(directoryPath);
 
         %get all fields from data struct
-        fields = fieldnames(hdfdata.RotatedVolumes);
+        fields = fieldnames(hdfdata.MVCenterRotatedVolumes);
 
         %iterate over all fields
         for i = 1 : numel(fields)
 
             %get field data
-            fieldData = hdfdata.RotatedVolumes.(fields{i}).images;
+            fieldData = hdfdata.MVCenterRotatedVolumes.(fields{i}).images;
 
             %get image from first frame in sequence, remove dimension of length 1
             slice = squeeze(fieldData(:,:,1)');
             
             %get mapse landmarks coordinates
-            mapseLandmarks = hdfdata.RotatedVolumes.(fields{i}).MAPSE_detected_landmarks';
-
-            fig =        
-            imshow(slice, [0 255])
+            mapseLandmarks = hdfdata.MVCenterRotatedVolumes.(fields{i}).MAPSE_detected_landmarks';
+            
+            imshow(slice, [0 255]);
         
             hold on
     
@@ -59,7 +58,7 @@ function PostProcessMapseImage3D(fileName, pathName, directoryPath, xlsfile, sav
             
             %save image
             fileName = strcat(directoryPath, name,'_',string(fields(i)),'.png');
-            imwrite(frame, gray, fileName);
+            saveas(gcf, fileName);
 
         end
     end

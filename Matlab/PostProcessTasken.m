@@ -27,7 +27,7 @@ for f=1:size(fileNamesMapse,2)
     [path, name, ext] = fileparts(fileNamesMapse(f).name);
     
     %post process the file
-    PostProcessMapseRecording3D(name, path, directoryPath, xlsfile, 1, 1, 0); % save movie and figure, no xls on linux
+    PostProcessMapseImage3D(name, path, directoryPath, xlsfile, 1, 1, 0); % save movie and figure, no xls on linux
 end
 
 
