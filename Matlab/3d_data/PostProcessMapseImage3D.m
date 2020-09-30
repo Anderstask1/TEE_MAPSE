@@ -5,6 +5,9 @@
 function PostProcessMapseImage3D(fileName, pathName, directoryPath, xlsfile, saveTrackingMovie, saveTrackingPlot, saveXls)
     filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated/';
     
+    fieldName = 'RotatedVolumes';
+    %fieldName = 'MVCenterRotatedVolumes';
+    
     %find all .h5 files
     fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
 
@@ -23,22 +26,25 @@ function PostProcessMapseImage3D(fileName, pathName, directoryPath, xlsfile, sav
 
         %create folder for images
         directoryPath = strcat(filesPath, 'PostProcessMapseImage', '/');
-        mkdir(directoryPath);
+        if ~exist(directoryPath, 'dir')
+            % Folder does not exist so create it.
+            mkdir(directoryPath);
+        end
 
         %get all fields from data struct
-        fields = fieldnames(hdfdata.MVCenterRotatedVolumes);
+        fields = fieldnames(hdfdata.(fieldName));
 
         %iterate over all fields
         for i = 1 : numel(fields)
 
             %get field data
-            fieldData = hdfdata.MVCenterRotatedVolumes.(fields{i}).images;
+            fieldData = hdfdata.(fieldName).(fields{i}).images;
 
             %get image from first frame in sequence, remove dimension of length 1
             slice = squeeze(fieldData(:,:,1)');
             
             %get mapse landmarks coordinates
-            mapseLandmarks = hdfdata.MVCenterRotatedVolumes.(fields{i}).MAPSE_detected_landmarks';
+            mapseLandmarks = hdfdata.(fieldName).(fields{i}).MAPSE_detected_landmarks';
             
             imshow(slice, [0 255]);
         

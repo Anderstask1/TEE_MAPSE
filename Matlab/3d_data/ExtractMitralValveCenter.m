@@ -18,8 +18,9 @@ function ExtractMitralValveCenter
         fprintf('Loaded file with name: %s. \n', name);
     
         %angle with best landmark detection result, used for MV center
-        %computation
-        angle = 84;
+        %computation, length must be equal to size(fileNames,2), one for
+        %each volume in folder
+        optMapseAngles = [110, 113, 89, 96, 90, 84];
 
         %% Load data
         fileName = strcat(name,'.h5'); 
@@ -35,14 +36,20 @@ function ExtractMitralValveCenter
         sz =size(vol1);
 
         %get field data
-        fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
+        fieldName = strcat('rotated_by_', int2str(optMapseAngles(f)),'_degrees');
 
         %get landmark coordinates, left landmark: x-y, right landmark x-y
         mapseLandmarks = hdfdata.RotatedVolumes.(fieldName).MAPSE_detected_landmarks';
 
+        %stop iteration if no landmark at specified angle
+        if isnan(mapseLandmarks)
+            disp('No MAPSE landmarks detected at given angle, so cannot find MV center.');
+            continue 
+        end
+        
         %load transformation matrix
-        trfFileName = strcat(filesPath,'Transformation-matrices_y-axis/','trf_matrix_y-axis-rotated_by_', int2str(angle),'_degrees.mat');
-        trf = load(trfFileName, 'trf').trf; %received signal from beam k
+        trfFileName = strcat(filesPath,'Transformation-matrices_y-axis/','trf_matrix_y-axis-rotated_by_', int2str(optMapseAngles(f)),'_degrees.mat');
+        trf = load(trfFileName, 'trf').trf;
 
         %% Transformation computation    
         %compute y coordinate value
@@ -115,7 +122,10 @@ function ExtractMitralValveCenter
 
             %create folder for transformation matrices
             directoryPath = strcat(filesPath, '/Transformation-matrices_mv-center/');
-            mkdir(directoryPath);
+            if ~exist(directoryPath, 'dir')
+                % Folder does not exist so create it.
+                mkdir(directoryPath);
+            end
 
             %save transformation in order to inverse transform coordinates later
             trfFileName = strcat(directoryPath,'trf_matrix_mv-center-rotated_by_', int2str(angle),'_degrees.mat');

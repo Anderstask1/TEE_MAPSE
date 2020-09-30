@@ -5,6 +5,9 @@ function SaveSliceImageHdf()
 
     filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated/';
     
+    fieldName = 'RotatedVolumes';
+    %fieldName = 'MVCenterRotatedVolumes';
+    
     %find all .h5 files
     fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
 
@@ -22,20 +25,23 @@ function SaveSliceImageHdf()
         data = HdfImport(filePath);
 
         %create folder for images
-        directoryPath = strcat(filesPath, '/SlicedImages_MVCenter_', name, '/');
-        %directoryPath = strcat(filesPath, '/SlicedImages_', name, '/');
-        mkdir(directoryPath);
+        %directoryPath = strcat(filesPath, '/SlicedImages_MVCenter_', name, '/');
+        directoryPath = strcat(filesPath, '/SlicedImages_', name, '/');
+        if ~exist(directoryPath, 'dir')
+            % Folder does not exist so create it.
+            mkdir(directoryPath);
+        end
 
         %get all fields from data struct
-        fields = fieldnames(data.MVCenterRotatedVolumes);
-        %fields = fieldnames(data.RotatedVolumes);
+        %fields = fieldnames(data.MVCenterRotatedVolumes);
+        fields = fieldnames(data.(fieldName));
 
         %iterate over all fields
         for i = 1 : numel(fields)
 
             %get field data
-            fieldData = data.MVCenterRotatedVolumes.(fields{i}).images;
-            %fieldData = data.RotatedVolumes.(fields{i}).images;
+            %fieldData = data.MVCenterRotatedVolumes.(fields{i}).images;
+            fieldData = data.(fieldName).(fields{i}).images;
 
             %get image, remove dimension of length 1
             slice = squeeze(fieldData(:,:,1));
