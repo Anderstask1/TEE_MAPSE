@@ -42,7 +42,10 @@ function RotateVolumeYAxis3D(path, name, angle, visualDebug)
     
     %create folder for transformation matrices
     directoryPath = strcat(path, '/Transformation-matrices_y-axis/');
-    mkdir(directoryPath);
+    if ~exist(directoryPath, 'dir')
+        % Folder does not exist so create it.
+        mkdir(directoryPath);
+    end
     
     %save transformation in order to inverse transform coordinates later
     trfFileName = strcat(directoryPath,'trf_matrix_y-axis-rotated_by_', int2str(angle),'_degrees.mat');
