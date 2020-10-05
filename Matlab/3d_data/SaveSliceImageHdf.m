@@ -33,14 +33,12 @@ function SaveSliceImageHdf()
         end
 
         %get all fields from data struct
-        %fields = fieldnames(data.MVCenterRotatedVolumes);
         fields = fieldnames(data.(fieldName));
 
         %iterate over all fields
         for i = 1 : numel(fields)
 
             %get field data
-            %fieldData = data.MVCenterRotatedVolumes.(fields{i}).images;
             fieldData = data.(fieldName).(fields{i}).images;
 
             %get image, remove dimension of length 1

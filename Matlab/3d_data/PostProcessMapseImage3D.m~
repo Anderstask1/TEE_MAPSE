@@ -1,9 +1,13 @@
-%Postprocess the deep learning results for MAPSE - single frame
+%Postprocess the deep learning results for MAPSE
 %Author: Anders Tasken
 %Started 18.09.2020
 
-function PostProcessMapseImage3D(fileName, pathName, directoryPath, xlsfile, saveTrackingMovie, saveTrackingPlot, saveXls)
+function PostProcessMapseImage3D
+    %% Load data
     filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated/';
+    
+    %fieldName = 'RotatedVolumes';
+    fieldName = 'MVCenterRotatedVolumes';
     
     %find all .h5 files
     fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
@@ -20,46 +24,86 @@ function PostProcessMapseImage3D(fileName, pathName, directoryPath, xlsfile, sav
         fileName = strcat(name,'.h5'); 
         filePath = strcat(filesPath, fileName);
         hdfdata = HdfImport(filePath);
-
-        %create folder for images
-        directoryPath = strcat(filesPath, 'PostProcessMapseImage', '/');
-        mkdir(directoryPath);
-
+        
+        %% Extract mapse landmark for all rotations and images
         %get all fields from data struct
-        fields = fieldnames(hdfdata.MVCenterRotatedVolumes);
+        fields = fieldnames(hdfdata.(fieldName));
+
+        %sort fields on rotation degree
+        sortedFields = natsort(fields);
+        
+        %number of frames
+        frameNo = length(fieldnames(hdfdata.CartesianVolumes));
+        
+        %store mapse coordinates in matrix
+        mapseLeft3DMatrix = zeros(3, numel(fields), frameNo);
+        mapseRight3DMatrix = zeros(3, numel(fields), frameNo);
 
         %iterate over all fields
         for i = 1 : numel(fields)
+            
+            %show progressfields
+            fprintf('Processing file: %s, on field %d of %d \n', name, i, numel(fields));
 
             %get field data
-            fieldData = hdfdata.MVCenterRotatedVolumes.(fields{i}).images;
+            fieldData = hdfdata.(fieldName).(fields{i}).images;
+            
+            %get mapse landmarks coordinates, left landmark: x-y, right landmark
+            %x-y, for all frames
+            mapseLandmarks = hdfdata.(fieldName).(sortedFields{i}).MAPSE_detected_landmarks';
+            
+            %plot image slice with landmarks
+            SaveImageSlice(fieldData, mapseLandmarks, name, fields(i), filesPath);
+            
+            %compute y coordinate value
+            volume = hdfdata.CartesianVolumes.('vol01');
+            y = size(volume,2)/2;
+            
+            %iterate over all frames
+            for j = 1 : frameNo
+            
+                %create 3d vector from coordinates, only 1st frame
+                mapseLeft3D = [mapseLandmarks(j,1); y; mapseLandmarks(j,2); 1];
+                mapseRight3D = [mapseLandmarks(j,3); y; mapseLandmarks(j,4); 1];
 
-            %get image from first frame in sequence, remove dimension of length 1
-            slice = squeeze(fieldData(:,:,1)');
-            
-            %get mapse landmarks coordinates
-            mapseLandmarks = hdfdata.MVCenterRotatedVolumes.(fields{i}).MAPSE_detected_landmarks';
-            
-            imshow(slice, [0 255]);
-        
-            hold on
-    
-            %plot landmarks (left and right)
-            if ~isnan(mapseLandmarks(1,1))
-                plot(mapseLandmarks(1,1), mapseLandmarks(1,2), 'gx', 'LineWidth', 2);
+                %% Inverse transform to original coordinate system
+                %load transformation matrix
+                trfFileName = strcat(filesPath,'Transformation-matrices_mv-center/','trf_matrix_mv-center-', sortedFields{i},'.mat');
+                mv_trf = load(trfFileName, 'mv_trf').mv_trf;
+
+                %inverse transformation matrix, to transform coordinates back to
+                %original system
+                inverse_trf = inv(mv_trf);
+
+                %inverse transform
+                mapseLeft3D_inv_trf = inverse_trf * mapseLeft3D;
+                mapseRight3D_inv_trf = inverse_trf * mapseRight3D;
+
+                %convert to cartesian coordinates
+                mapseLeft3D_inv_trf(4) = [];
+                mapseRight3D_inv_trf(4) = [];
+
+                %save
+                mapseLeft3DMatrix(:, i, j) = mapseLeft3D_inv_trf;
+                mapseRight3DMatrix(:, i, j) = mapseRight3D_inv_trf;
+                
             end
-            if ~isnan(mapseLandmarks(1,3))
-                plot(mapseLandmarks(1,3), mapseLandmarks(1,4), 'bx', 'LineWidth', 2);
-            end
-
-            hold off
-
-            drawnow
-            
-            %save image
-            fileName = strcat(directoryPath, name,'_',string(fields(i)),'.png');
-            saveas(gcf, fileName);
-
         end
+        
+        %% Save Mapse Matrices
+        %create folder for figure
+        directoryPath = strcat(filesPath, 'MVAnnulusMapseMatrices');
+        if ~exist(directoryPath, 'dir')
+            % Folder does not exist so create it.
+            mkdir(directoryPath);
+        end
+        
+        %save matrices
+        matricesName = strcat(directoryPath, '/', name,'_mapseMatrices');
+        save(matricesName, 'mapseLeft3DMatrix', 'mapseRight3DMatrix'); 
+        
+        %plot mitral annulus 3D
+        MitralAnnulus3DRendering(mapseLeft3DMatrix, mapseRight3DMatrix, frameNo, filesPath)
+        
     end
 end
