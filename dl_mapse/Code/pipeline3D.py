@@ -114,8 +114,8 @@ def main():
         pal_path = "/pal_text_file/pal.txt"
 
     # Field name in h5 file, RotatedVolumes = rotated y axis, MVCenterRotatedVolumes = rotated around MV center
-    field_name = "RotatedVolumes"
-    #field_name = "MVCenterRotatedVolumes"
+    #field_name = "RotatedVolumes"
+    field_name = "MVCenterRotatedVolumes"
 
     model_seq_len = 1
     usePal = False

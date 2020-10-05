@@ -16,6 +16,7 @@ function ExtractMitralValveCenter
         
         %show progress
         fprintf('Loaded file with name: %s. \n', name);
+        fprintf('File %d of %d \n', f, size(fileNames,2));
     
         %angle with best landmark detection result, used for MV center
         %computation, length must be equal to size(fileNames,2), one for
@@ -71,7 +72,7 @@ function ExtractMitralValveCenter
         %find MV center
         mvCenter= [(mapseLeft3D_inv_trf(1) + mapseRight3D_inv_trf(1))/2; (mapseLeft3D_inv_trf(2) + mapseRight3D_inv_trf(2))/2; (mapseLeft3D_inv_trf(3) + mapseRight3D_inv_trf(3))/2; 1];
 
-        %translate origin to MV center
+        %translate origin to probe center
         translateM_mvCenter = [
               1 0 0 sz(1)/2
               0 1 0 sz(2)/2
