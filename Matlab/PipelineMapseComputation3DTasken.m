@@ -32,7 +32,7 @@ for f=1:size(fileNames,2)
     %rotate 3d data
     RotateVolumeYAxis3D(path, name);
         
-    %% Save image from first frame of y-axis rotation
+    % Save image from first frame of y-axis rotation
     SaveSliceImageHdf(path, name, 'RotatedVolumes');
 end
 
@@ -47,9 +47,9 @@ disp('Run DNN model to find MAPSE landmarks in y-axis rotated slices (python)');
 system('python /home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Code/pipeline3D.py RotatedVolumes');
 
 %% Save image of y-axis rotated slices with landmarks
-disp('Save images of rotated slices with landmarks');
+disp('Save images of y-axis rotated slices with landmarks');
 
-SaveSliceImageWithLandmarksHdf(path,  name, 'RotatedVolumes');
+SaveSliceImageWithLandmarksHdf(path, name, 'RotatedVolumes');
 
 %% Find optimal angle for mitral valve center computation
 disp('Find optimal y-axis rotation angle');
@@ -97,6 +97,11 @@ disp('Run DNN model to find MAPSE landmarks in MV center rotated slices (python)
 % conda activate TEE_MAPSE
 % matlab
 system('python /home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Code/pipeline3D.py MVCenterRotatedVolumes');
+
+%% Save image of mv-center rotated slices with landmarks
+disp('Save images of mv center rotated slices with landmarks');
+
+SaveSliceImageWithLandmarksHdf(path, name, 'MVCenterRotatedVolumes');
 
 %% MAPSE processing
 
