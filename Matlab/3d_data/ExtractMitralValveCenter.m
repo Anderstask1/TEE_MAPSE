@@ -3,7 +3,7 @@
 %Started 24.09.2020
 
 function ExtractMitralValveCenter
-    filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated/';
+    filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated_2files/';
 
     %find all .h5 files
     fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
@@ -20,8 +20,9 @@ function ExtractMitralValveCenter
     
         %angle with best landmark detection result, used for MV center
         %computation, length must be equal to size(fileNames,2), one for
-        %each volume in folder
-        optMapseAngles = [110, 113, 89, 96, 90, 84];
+        %each file in folder
+        %optMapseAngles = [110, 113, 89, 96, 90, 84];
+        optMapseAngles = [84, 84];
 
         %% Load data
         fileName = strcat(name,'.h5'); 
@@ -73,7 +74,7 @@ function ExtractMitralValveCenter
         mvCenter= [(mapseLeft3D_inv_trf(1) + mapseRight3D_inv_trf(1))/2; (mapseLeft3D_inv_trf(2) + mapseRight3D_inv_trf(2))/2; (mapseLeft3D_inv_trf(3) + mapseRight3D_inv_trf(3))/2; 1];
 
         %translate origin to probe center
-        translateM_mvCenter = [
+        translateM_probeCenter = [
               1 0 0 sz(1)/2
               0 1 0 sz(2)/2
               0 0 1 0
@@ -87,7 +88,7 @@ function ExtractMitralValveCenter
     %     theta = - atan(mapseRight3D_mvCenter(1)/mapseRight3D_mvCenter(3));
 
         %right mapse landmark coordinates after translation
-        mvCenter_translated = inv(translateM_mvCenter) * mvCenter;
+        mvCenter_translated = inv(translateM_probeCenter) * mvCenter;
 
         %find rotation resulting in the MV center on the z-axis (when origin at probe)
         alpha = - atan(mvCenter_translated(1)/mvCenter_translated(3));
@@ -116,7 +117,7 @@ function ExtractMitralValveCenter
                  0           0            0 1
                  ];
 
-            mv_trf = translateM_mvCenter * rotateM_z * rotateM_y * inv(translateM_mvCenter);
+            mv_trf = translateM_probeCenter * rotateM_z * rotateM_y * inv(translateM_probeCenter);
 
             %transform volume to coordinate system with mv as origin
             mv_tform = affine3d(mv_trf');
