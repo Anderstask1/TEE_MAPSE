@@ -33,9 +33,9 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, saveIma
     end
 
     %% Extract mapse landmark for all rotations and images
-    %store mapse coordinates in matrix
-    mapseLeft3DMatrix = zeros(3, numel(fields), frameNo);
-    mapseRight3DMatrix = zeros(3, numel(fields), frameNo);
+    %store landmark coordinates in matrix
+    landmarkLeft3DMatrix = zeros(3, numel(fields), frameNo);
+    landmarkRight3DMatrix = zeros(3, numel(fields), frameNo);
 
     %iterate over all fields
     for i = 1 : numel(fields)
@@ -43,7 +43,7 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, saveIma
         %show progressfields
         fprintf('Processing file: %s, on field %d of %d \n', name, i, numel(fields));
 
-        %get mapse landmarks coordinates, left landmark: x-y, right landmark
+        %get landmark landmarks coordinates, left landmark: x-y, right landmark
         %x-y, for all frames
         mapseLandmarks = hdfdata.(fieldName).(sortedFields{i}).MAPSE_detected_landmarks';
 
@@ -55,8 +55,8 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, saveIma
         for j = 1 : frameNo
 
             %create 3d vector from coordinates, only 1st frame
-            mapseLeft3D = [mapseLandmarks(j,1); y; mapseLandmarks(j,2); 1];
-            mapseRight3D = [mapseLandmarks(j,3); y; mapseLandmarks(j,4); 1];
+            landmarkLeft3D = [mapseLandmarks(j,1); y; mapseLandmarks(j,2); 1];
+            landmarkRight3D = [mapseLandmarks(j,3); y; mapseLandmarks(j,4); 1];
 
             %% Inverse transform to original coordinate system
             %load transformation matrix
@@ -79,20 +79,31 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, saveIma
             inverse_mv_trf = inv(mv_trf);
 
             %inverse transform
-            mapseLeft3D_inv_trf = inverse_mv_trf * mapseLeft3D;
-            mapseRight3D_inv_trf = inverse_mv_trf * mapseRight3D;
+            landmarkLeft3D_inv_trf = inverse_mv_trf * landmarkLeft3D;
+            landmarkRight3D_inv_trf = inverse_mv_trf * landmarkRight3D;
 
             %convert to cartesian coordinates
-            mapseLeft3D_inv_trf(4) = [];
-            mapseRight3D_inv_trf(4) = [];
+            landmarkLeft3D_inv_trf(4) = [];
+            landmarkRight3D_inv_trf(4) = [];
 
             %save
-            mapseLeft3DMatrix(:, i, j) = mapseLeft3D_inv_trf;
-            mapseRight3DMatrix(:, i, j) = mapseRight3D_inv_trf;
+            landmarkLeft3DMatrix(:, i, j) = landmarkLeft3D_inv_trf;
+            landmarkRight3DMatrix(:, i, j) = landmarkRight3D_inv_trf;
 
         end
     end
-
+    
+    %% Interpolation of landmark values
+%     plot3(landmarkLeft3DMatrix(1,:,1),landmarkLeft3DMatrix(2,:,1),landmarkLeft3DMatrix(3,:,1),'ro','LineWidth',2);
+%     hold on 
+%     xyz = landmarkLeft3DMatrix(:,:,1);
+%     xyz(:,isnan(xyz(1,:))) = [];
+%     interpolation = cscvn(xyz(:,[1:end 1]));
+%     fnplt(interpolation,'r',2);
+%     hold off
+    interpLeftLandmark3D = InterpolateLandmarks3D(landmarkLeft3DMatrix, frameNo);
+    interpRightLandmark3D = InterpolateLandmarks3D(landmarkRight3DMatrix, frameNo);
+    
     %% Plot image slice with landmarks
     if saveImageSlice
         SaveSliceImageWithLandmarksHdf(filesPath, name, 'MVCenterRotatedVolumes');
@@ -100,16 +111,16 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, saveIma
     
     %% Plot mitral annulus 3D
     if saveAnnulus3D
-        MitralAnnulus3DRendering(hdfdata, mapseLeft3DMatrix, mapseRight3DMatrix, frameNo, name, filesPath, 0, 1, 0)
+        MitralAnnulus3DRendering(hdfdata, interpLeftLandmark3D, interpRightLandmark3D, landmarkLeft3DMatrix, landmarkRight3DMatrix, frameNo, name, filesPath, 0, 1, 0, 1, 1)
     end
     
     %% Rotation correction
     %estimate frames for ed and es
-    [~, ed_frame] = max(nanmean(mapseLeft3DMatrix(3,:,:)));
-    [~, es_frame] = min(nanmean(mapseLeft3DMatrix(3,:,:)));
+    [~, ed_frame] = max(nanmean(landmarkLeft3DMatrix(3,:,:)));
+    [~, es_frame] = min(nanmean(landmarkLeft3DMatrix(3,:,:)));
     
     %rotation correction transformation matrix- post processing module
-    [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatrix, mapseRight3DMatrix, ed_frame, es_frame, frameNo, pixelCorr);
+    [com_left_corr, com_right_corr] = RotationCorrection3D(landmarkLeft3DMatrix, landmarkRight3DMatrix, ed_frame, es_frame, frameNo, pixelCorr);
     
     %% Peak detection
     [left_peaks, right_peaks] = PeakDetection3D(com_left_corr, com_right_corr);

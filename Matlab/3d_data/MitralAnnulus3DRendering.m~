@@ -132,59 +132,58 @@ function MitralAnnulus3DRendering(hdfdata, interpLeftLandmark3D, interpRightLand
         
         interpFigure = figure;
         
-        fnplt(interpLeftLandmark3D(1),2);
-        
         hold on
+        fnplt(interpLeftLandmark3D(1),2);
         fnplt(interpRightLandmark3D(1),2);
         hold off
         
         %figure title
-        interpFigName = strcat('Interpolation plot of: -', name);
-        title(interpFigName);
+        lineFigName = strcat('Interpolation plot of: -', name);
+        title(lineFigName);
 
         %save figure
-        interpFrameFigName = strcat(directoryPath, name,'_interpolation-plot3D.fig');
-        savefig(interpFigure, interpFrameFigName);
+        lineFrameFigName = strcat(directoryPath, name,'_interpolation-plot3D.fig');
+        savefig(lineFrameFig, lineFrameFigName);
     end
     
     %% Plot of interpolated annulus - all frames - left
     if saveInterpPlotAllFrames
         
         interpAllFramesFigure = figure;
+        hold on 
         
         for f = 1 : frameNo
             fnplt(interpLeftLandmark3D(f),2);
-            hold on 
         end
         
         hold off
         
         %figure title
-        interpFigName = strcat('Interpolation left plot (all frames) of: -', name);
-        title(interpFigName);
+        lineFigName = strcat('Interpolation plot of: -', name);
+        title(lineFigName);
 
         %save figure
-        interpFrameFigName = strcat(directoryPath, name,'_interpolation-plot3D_left_all-frames.fig');
-        savefig(interpAllFramesFigure, interpFrameFigName);
+        lineFrameFigName = strcat(directoryPath, name,'_interpolation-plot3D_left_all-frames.fig');
+        savefig(lineFrameFig, lineFrameFigName);
     end
     %% Plot of interpolated annulus - all frames - right
     if saveInterpPlotAllFrames
         
         interpAllFramesFigure = figure;
+        hold on 
         
         for f = 1 : frameNo
             fnplt(interpRightLandmark3D(f),2);
-            hold on 
         end
         
         hold off
         
         %figure title
-        interpFigName = strcat('Interpolation right plot (all frames) of: -', name);
-        title(interpFigName);
+        lineFigName = strcat('Interpolation plot of: -', name);
+        title(lineFigName);
 
         %save figure
-        interpFrameFigName = strcat(directoryPath, name,'_interpolation-plot3D_right_all-frames.fig');
-        savefig(interpAllFramesFigure, interpFrameFigName);
+        lineFrameFigName = strcat(directoryPath, name,'_interpolation-plot3D_right_all-frames.fig');
+        savefig(lineFrameFig, lineFrameFigName);
     end
 end
