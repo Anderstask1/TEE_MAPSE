@@ -2,7 +2,7 @@
 %Author: Anders Tasken
 %Started 18.09.2020
 
-function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, mapse_left_matrix, mapse_right_matrix, saveImageSlice, saveAnnulus3D)
+function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, saveImageSlice, saveAnnulus3D)
     %% Load data   
     %fieldName = 'RotatedVolumes';
     fieldName = 'MVCenterRotatedVolumes';
@@ -24,7 +24,13 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, mapse_l
     %number of frames
     frameNo = length(fieldnames(hdfdata.CartesianVolumes));
     
-    pixelCorr = hdfdata.ImageGeometry.voxelsize;
+    %default voxelsize value
+    pixelCorr = 0.7e-3;
+    
+    %check if voxeldize is in hdfdata
+    if any(strcmp(fieldnames(hdfdata),'a'))
+        pixelCorr = hdfdata.ImageGeometry.voxelsize;
+    end
 
     %% Extract mapse landmark for all rotations and images
     %store mapse coordinates in matrix
@@ -37,17 +43,9 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, mapse_l
         %show progressfields
         fprintf('Processing file: %s, on field %d of %d \n', name, i, numel(fields));
 
-        %get field data
-        fieldData = hdfdata.(fieldName).(fields{i}).images;
-
         %get mapse landmarks coordinates, left landmark: x-y, right landmark
         %x-y, for all frames
         mapseLandmarks = hdfdata.(fieldName).(sortedFields{i}).MAPSE_detected_landmarks';
-
-        %plot image slice with landmarks
-        if saveImageSlice
-            SaveImageSlice(fieldData, mapseLandmarks, name, fields(i), filesPath);
-        end
 
         %compute y coordinate value
         volume = hdfdata.CartesianVolumes.('vol01');
@@ -62,16 +60,27 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, mapse_l
 
             %% Inverse transform to original coordinate system
             %load transformation matrix
-            trfFileName = strcat(filesPath,'Transformation-matrices_mv-center/','trf_matrix_mv-center-', sortedFields{i},'.mat');
+            trfFileName = strcat(filesPath,'Transformation-matrices_mv-center_', name,'/trf_matrix_mv-center-', sortedFields{i},'.mat');
             mv_trf = load(trfFileName, 'mv_trf').mv_trf;
+            
+            trfFileName = strcat(filesPath,'Transformation-matrices_mv-center_', name,'/translateM_probeCenter_matrix_mv-center-', sortedFields{i},'.mat');
+            translateM_probeCenter = load(trfFileName, 'translateM_probeCenter').translateM_probeCenter;  
+
+            trfFileName = strcat(filesPath,'Transformation-matrices_mv-center_', name,'/rotateM_y_matrix_mv-center-', sortedFields{i},'.mat');
+            rotateM_y = load(trfFileName, 'rotateM_y').rotateM_y;  
+            
+            trfFileName = strcat(filesPath,'Transformation-matrices_mv-center_', name,'/rotateM_z_matrix_mv-center-', sortedFields{i},'.mat');
+            rotateM_z = load(trfFileName, 'rotateM_z').rotateM_z;  
 
             %inverse transformation matrix, to transform coordinates back to
             %original system
-            inverse_trf = inv(mv_trf);
+            %inverse_trf = inv(trf);
+            mv_trf = translateM_probeCenter * inv(rotateM_z) * inv(translateM_probeCenter);
+            inverse_mv_trf = inv(mv_trf);
 
             %inverse transform
-            mapseLeft3D_inv_trf = inverse_trf * mapseLeft3D;
-            mapseRight3D_inv_trf = inverse_trf * mapseRight3D;
+            mapseLeft3D_inv_trf = inverse_mv_trf * mapseLeft3D;
+            mapseRight3D_inv_trf = inverse_mv_trf * mapseRight3D;
 
             %convert to cartesian coordinates
             mapseLeft3D_inv_trf(4) = [];
@@ -84,15 +93,22 @@ function [mapse_left, mapse_right] = PostProcessMapse3D(name, filesPath, mapse_l
         end
     end
 
-    %plot mitral annulus 3D
+    %% Plot image slice with landmarks
+    if saveImageSlice
+        SaveSliceImageWithLandmarksHdf(filesPath, name, 'MVCenterRotatedVolumes');
+    end
+    
+    %% Plot mitral annulus 3D
     if saveAnnulus3D
-        MitralAnnulus3DRendering(mapseLeft3DMatrix, mapseRight3DMatrix, frameNo, name, filesPath)
+        MitralAnnulus3DRendering(hdfdata, mapseLeft3DMatrix, mapseRight3DMatrix, frameNo, name, filesPath, 0, 1, 0)
     end
     
     %% Rotation correction
-    %Rotation correction transformation matrix- post processing module
-    ed_frame = 1;
-    es_frame = 10;
+    %estimate frames for ed and es
+    [~, ed_frame] = max(nanmean(mapseLeft3DMatrix(3,:,:)));
+    [~, es_frame] = min(nanmean(mapseLeft3DMatrix(3,:,:)));
+    
+    %rotation correction transformation matrix- post processing module
     [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatrix, mapseRight3DMatrix, ed_frame, es_frame, frameNo, pixelCorr);
     
     %% Peak detection

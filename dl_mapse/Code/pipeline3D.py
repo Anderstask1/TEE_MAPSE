@@ -1,4 +1,5 @@
 import os
+import sys
 import cv2
 import h5py
 import numpy as np
@@ -114,9 +115,18 @@ def main():
         pal_path = "/pal_text_file/pal.txt"
 
     # Field name in h5 file, RotatedVolumes = rotated y axis, MVCenterRotatedVolumes = rotated around MV center
-    #field_name = "RotatedVolumes"
-    field_name = "MVCenterRotatedVolumes"
+    # Default value
+    field_name = "RotatedVolumes"
+    #field_name = "MVCenterRotatedVolumes"
 
+    ## User input field name ("RotatedVolumes" or "MVCenterRotatedVolumes")
+    # Only use first input argument (second element, after pipeline3d.py)
+    if len(sys.argv) > 1:
+        user_input = str(sys.argv[1])
+        if user_input == "RotatedVolumes" or user_input == "MVCenterRotatedVolumes":
+            field_name = user_input
+
+    print('Fieldname is: ', field_name)
     model_seq_len = 1
     usePal = False
 
