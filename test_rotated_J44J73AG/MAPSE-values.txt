@@ -1,0 +1,6 @@
+MAPSE left values
+J44J73AG: 10.298359 mm
+
+
+MAPSE right values
+J44J73AG: 8.959677 mm

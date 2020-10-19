@@ -1,4 +1,4 @@
-function [left_peaks, right_peaks] = PeakDetection3D(com_left_corr, com_right_corr)
+function [left_peaks, right_peaks] = PeakDetection3D(com_left_corr, com_right_corr, filesPath, name, savePeakPlot)
     %% Peak computation
     % Left
     %find max and min
@@ -18,29 +18,47 @@ function [left_peaks, right_peaks] = PeakDetection3D(com_left_corr, com_right_co
     
     %% Plot
     %plot z-value of CoM as a function of time/frame
+    if savePeakPlot
     
-    % Left
-    figure
-    plot(com_left_corr(3,:));
-    
-    hold on
-    
-    plot(es_left_frame, es_left_peak, 'r*');
-    
-    hold on
-    
-    plot(ed_left_frame, ed_left_peak, 'r*');
-    
-    % Right
-    plot(com_right_corr(3,:));
-    
-    hold on
-    
-    plot(es_right_frame, es_right_peak, 'r*');
-    
-    hold on
-    
-    plot(ed_right_frame, ed_right_peak, 'r*');
-   
+        peakFig = figure('visible','off');
+        
+        % Left
+        plot(com_left_corr(3,:));
 
+        hold on
+
+        plot(es_left_frame, es_left_peak, 'r*');
+
+        plot(ed_left_frame, ed_left_peak, 'r*');
+
+        % Right
+        plot(com_right_corr(3,:));
+
+        plot(es_right_frame, es_right_peak, 'r*');
+
+        plot(ed_right_frame, ed_right_peak, 'r*');
+        
+        hold off
+        
+        %save
+        
+        %create folder for figure
+        directoryPath = strcat(filesPath, 'PostProcessMVAnnulusFigures/');
+        if ~exist(directoryPath, 'dir')
+            % Folder does not exist so create it.
+            mkdir(directoryPath);
+        end
+
+        %create folder for figure
+        directoryPath = strcat(directoryPath, name, '/');
+        if ~exist(directoryPath, 'dir')
+            % Folder does not exist so create it.
+            mkdir(directoryPath);
+        end
+        
+        %save figure
+        figName = strcat(directoryPath, name,'_peak_detection.png');
+        saveas(peakFig, figName);
+   
+    end
 end

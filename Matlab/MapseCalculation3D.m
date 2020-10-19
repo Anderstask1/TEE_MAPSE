@@ -1,4 +1,4 @@
-function [mapse_left, mapse_right] = MapseCalculation(left_peaks, right_peaks)
+function [mapse_left, mapse_right] = MapseCalculation3D(left_peaks, right_peaks)
 
     %% Compute distance between peaks
     % Left

@@ -72,7 +72,7 @@ class LandmarkDetector(object):
             prediction_masks = torch.sigmoid(self.model(model_input))
             predicted_sequence[frame,:,:,:] = prediction_masks[0,:,:,:]
 
-            print("Processing frame: " + str(frame))
+            #print("Processing frame: " + str(frame))
 
             #plt.clf()
             #plt.imshow(predicted_sequence[frame,0,:,:], cmap='gray')
@@ -103,12 +103,12 @@ def main():
     # Toggle run locally - run on FloydHub
     isRunningLocally = True
 
-    if isRunningLocally:
-        ## Run locally
-        file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated"
-        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
-        pal_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt"
-    else:
+    ## Run locally
+    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated"
+    model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
+    pal_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt"
+
+    if not isRunningLocally:
         ## Run on FloydHub
         file_dir = "/testing_data"
         model_path = "/pytorch_models/best_true_weights_Mapse_length1.pth"
@@ -126,7 +126,14 @@ def main():
         if user_input == "RotatedVolumes" or user_input == "MVCenterRotatedVolumes":
             field_name = user_input
 
+    # User input file path (in order to mach matlab script from command line)
+    if len(sys.argv) > 2:
+        user_input = str(sys.argv[2])
+        file_dir = user_input
+
     print('Fieldname is: ', field_name)
+    print('File path is: ', file_dir)
+
     model_seq_len = 1
     usePal = False
 

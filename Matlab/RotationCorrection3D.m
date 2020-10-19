@@ -24,7 +24,7 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
             ];
     
     %CoM coordinates after translation
-    com_ed_left_trans = inv(translate_com_es_left) * com_ed_left;
+    com_ed_left_trans = translate_com_es_left\com_ed_left;%inv(translate_com_es_left) * com_ed_left
         
     %rotation around x-axis to lie ED CoM on xz-plane
     theta = atan(com_ed_left_trans(2)/com_ed_left_trans(3));
@@ -50,7 +50,7 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
              ];         
     
     %transformation matrix
-    mv_trf = rotate_com_y * rotate_com_x * inv(translate_com_es_left);
+    mv_trf = rotate_com_y * rotate_com_x / translate_com_es_left;
     
     %corrected coordinates for CoM of mapse landmarks 
     com_left_corr = zeros(3, frameNo);
@@ -73,7 +73,7 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
          
     end
     
-    %% -------------------- LEFT --------------------    
+    %% -------------------- RIGHT --------------------    
     %% Find CoM in ES and ED 
     
     %CoM computation
@@ -97,7 +97,7 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
             ];
     
     %CoM coordinates after translation
-    com_ed_right_trans = inv(translate_com_es_right) * com_ed_right;
+    com_ed_right_trans = translate_com_es_right \ com_ed_right;
         
     %rotation around x-axis to lie ED CoM on xz-plane
     theta = atan(com_ed_right_trans(2)/com_ed_right_trans(3));
@@ -123,7 +123,7 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
              ];         
     
     %transformation matrix
-    mv_trf = rotate_com_y * rotate_com_x * inv(translate_com_es_right);
+    mv_trf = rotate_com_y * rotate_com_x / translate_com_es_right;
     
     %corrected coordinates for CoM of mapse landmarks 
     com_right_corr = zeros(3, frameNo);
