@@ -147,7 +147,7 @@ disp('Show selected plots')
 % _frame_1_spline_interpolation-plot3D.fig - _frame_1_spline_interpolation-plot3D_with_slices.fig
 % _spline_interpolation-plot3D_left_all-frames.fig - _spline_interpolation-plot3D_right_all-frames.fig
 % _frame_1_bezier_interpolation_3D_with_slices - J65BP22K_frame_1_bezier_interpolation_3D
-plotnames = {'_frame_1_spline_interpolation-plot3D_with_slices.fig', '_frame_1_bezier_interpolation_3D_with_slices'};
+plotnames = {'_frame_1_lineplot3D_with_slices.fig', '_frame_1_bezier_interpolation_3D_with_slices'};
 
 %call the script for each plot
 for i = 1 : length(plotnames)

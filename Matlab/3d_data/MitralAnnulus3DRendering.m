@@ -200,7 +200,7 @@ function MitralAnnulus3DRendering(hdfdata, leftLandmarkSplineCurve, rightLandmar
     %% Plot of interpolated annulus - all frames - left
     if saveSplineInterpPlot
         
-        interpAllFramesFigure = figure;%('visible','off');
+        interpAllFramesFigure = figure('visible','off');
         
         for f = 1 : frameNo
             fnplt(leftLandmarkSplineCurve(f),2);

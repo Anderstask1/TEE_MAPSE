@@ -1,0 +1,6 @@
+MAPSE left values
+J65BP22K: 9.826603 mm
+
+
+MAPSE right values
+J65BP22K: 9.298379 mm
