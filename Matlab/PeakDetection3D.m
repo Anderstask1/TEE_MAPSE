@@ -23,25 +23,27 @@ function [left_peaks, right_peaks] = PeakDetection3D(com_left_corr, com_right_co
         peakFig = figure('visible','off');
         
         % Left
-        plot(com_left_corr(3,:));
+        plot(com_left_corr(3,:), 'LineWidth', 3); hold on
+        
+        % Right
+        plot(com_right_corr(3,:), 'LineWidth', 3);
+        
+        % Left
+        plot(es_left_frame, es_left_peak, 'rh','MarkerSize', 15, 'MarkerFaceColor', 'r');
 
-        hold on
-
-        plot(es_left_frame, es_left_peak, 'r*');
-
-        plot(ed_left_frame, ed_left_peak, 'r*');
+        plot(ed_left_frame, ed_left_peak, 'rh','MarkerSize', 15, 'MarkerFaceColor', 'r');
 
         % Right
-        plot(com_right_corr(3,:));
+        plot(es_right_frame, es_right_peak, 'rh','MarkerSize', 15, 'MarkerFaceColor', 'r');
 
-        plot(es_right_frame, es_right_peak, 'r*');
-
-        plot(ed_right_frame, ed_right_peak, 'r*');
+        plot(ed_right_frame, ed_right_peak, 'rh','MarkerSize', 15, 'MarkerFaceColor', 'r');
         
-        hold off
+        title('Peak detection');
+        xlabel('Frame in ultrasound sequence');
+        ylabel('Z-axis value [m]');
+        legend('Left landmark CoM', 'Right landmark CoM', 'Peaks'); hold off
         
         %save
-        
         %create folder for figure
         directoryPath = strcat(filesPath, 'PostProcessMVAnnulusFigures/');
         if ~exist(directoryPath, 'dir')

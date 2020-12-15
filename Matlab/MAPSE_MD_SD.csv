@@ -1,0 +1,7 @@
+Row,MeanDifferenceMAPSE,StandardDeviationMAPSE
+Left Landmark Detector,NaN,NaN
+Right Landmark Detector,19.6903561535104,0
+Outlier-rejected Left Landmark Detector,NaN,NaN
+Outlier-rejected Right Landmark Detector,NaN,NaN
+Bezier of Left Landmark Detector,92.0245329791961,0
+Bezier of Right Landmark Detector,NaN,NaN

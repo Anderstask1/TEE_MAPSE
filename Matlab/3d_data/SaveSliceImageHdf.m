@@ -31,6 +31,19 @@ function SaveSliceImageHdf(fileNames, fieldName)
             % Folder does not exist so create it.
             mkdir(directoryPath);
         end
+        
+        optMapseAngle = -1;
+        if strcmp(fieldName, 'MVCenterRotatedVolumes')
+            %load optMapseAngles
+            filename = strcat(path, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');
+            optMapseAngle = load(filename, 'optMapseAngle').optMapseAngle;           
+        end
+        
+        %skip iteration if optimal angle is 0 (most likely due to no landmarks)
+        if optMapseAngle == 0
+            fprintf('Optimal mapse angle is 0, skipping iteration with file %s \n', name);
+            continue
+        end
 
         %get all fields from data struct
         fields = fieldnames(data.(fieldName));

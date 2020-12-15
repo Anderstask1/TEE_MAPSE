@@ -1,17 +1,33 @@
-function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatrix, mapseRight3DMatrix, es_frame, ed_frame, frameNo, pixelCorr)
+function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatrix, mapseRight3DMatrix, frameNo, pixelCorr)
     
+    %corrected coordinates for CoM of mapse landmarks 
+    com_left_corr = zeros(3, frameNo);
+    
+    %corrected coordinates for CoM of mapse landmarks 
+    com_right_corr = zeros(3, frameNo);
+
+    %estimate frames for ed and es
+    [ed_value, ed_frame] = max(nanmean(mapseLeft3DMatrix(3,:,:)));
+    [es_value, es_frame] = min(nanmean(mapseLeft3DMatrix(3,:,:)));
+    
+    if isnan(ed_value) ed_frame=2; end
+    if isnan(es_value) es_frame=2; end
+
     %% -------------------- LEFT --------------------
     %% Find CoM in ES and ED 
     
-    %CoM computation
-    com_es_left = [nanmean(mapseLeft3DMatrix(1,:,es_frame));
-                   nanmean(mapseLeft3DMatrix(2,:,es_frame));
-                   nanmean(mapseLeft3DMatrix(3,:,es_frame));
+    %CoM computation - CoM of 3 frames
+    if es_frame==1 es_frame=es_frame+1;, elseif es_frame==frameNo es_frame=es_frame-1;, end  
+    if ed_frame==1 ed_frame=ed_frame+1;, elseif ed_frame==frameNo ed_frame=ed_frame-1;, end
+    
+    com_es_left = [nanmean((mapseLeft3DMatrix(1,:,es_frame-1) + mapseLeft3DMatrix(1,:,es_frame) + mapseLeft3DMatrix(1,:,es_frame+1))/3);
+                   nanmean((mapseLeft3DMatrix(2,:,es_frame-1) + mapseLeft3DMatrix(2,:,es_frame) + mapseLeft3DMatrix(2,:,es_frame+1))/3);
+                   nanmean((mapseLeft3DMatrix(3,:,es_frame-1) + mapseLeft3DMatrix(3,:,es_frame) + mapseLeft3DMatrix(3,:,es_frame+1))/3);
                    1];
     
-    com_ed_left = [nanmean(mapseLeft3DMatrix(1,:,ed_frame));
-                   nanmean(mapseLeft3DMatrix(2,:,ed_frame));
-                   nanmean(mapseLeft3DMatrix(3,:,ed_frame));
+    com_ed_left = [nanmean((mapseLeft3DMatrix(1,:,ed_frame-1) + mapseLeft3DMatrix(1,:,ed_frame) + mapseLeft3DMatrix(1,:,ed_frame+1))/3);
+                   nanmean((mapseLeft3DMatrix(2,:,ed_frame-1) + mapseLeft3DMatrix(2,:,ed_frame) + mapseLeft3DMatrix(2,:,ed_frame+1))/3);
+                   nanmean((mapseLeft3DMatrix(3,:,ed_frame-1) + mapseLeft3DMatrix(3,:,ed_frame) + mapseLeft3DMatrix(3,:,ed_frame+1))/3);
                    1];
     
     %% Translation and rotation
@@ -52,9 +68,6 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
     %transformation matrix
     mv_trf = rotate_com_y * rotate_com_x / translate_com_es_left;
     
-    %corrected coordinates for CoM of mapse landmarks 
-    com_left_corr = zeros(3, frameNo);
-    
     %rotation correction on all mapse landmarks
     for j = 1 : frameNo
         %CoM for left mapse landmark - frame j
@@ -62,7 +75,7 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
                    nanmean(mapseLeft3DMatrix(2,:,j));
                    nanmean(mapseLeft3DMatrix(3,:,j));
                    1];
-        
+               
         %transform according to rotation correction - heart expansion along z-axis
         com_left_trf = mv_trf * com_left;
         
@@ -70,7 +83,6 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
         com_left_trf(end) = [];
         
         com_left_corr(:, j) = pixelCorr .* com_left_trf;       
-         
     end
     
     %% -------------------- RIGHT --------------------    
@@ -124,9 +136,6 @@ function [com_left_corr, com_right_corr] = RotationCorrection3D(mapseLeft3DMatri
     
     %transformation matrix
     mv_trf = rotate_com_y * rotate_com_x / translate_com_es_right;
-    
-    %corrected coordinates for CoM of mapse landmarks 
-    com_right_corr = zeros(3, frameNo);
     
     %rotation correction on all mapse landmarks
     for j = 1 : frameNo

@@ -3,7 +3,7 @@
 %landmarks is biggest
 %Author: Anders Tasken
 %Started 07.10.2020
-function optMapseAngles= OptimalMapseAngles(fileNames, filesPath)
+function OptimalMapseAngles(fileNames, filesPath)
 
     %for each file
     for f=1:size(fileNames,2)
@@ -14,7 +14,7 @@ function optMapseAngles= OptimalMapseAngles(fileNames, filesPath)
         fprintf('Loaded file with name: %s. \n', name);
 
         %default angle value
-        angle = 0;
+        optMapseAngle = 0;
 
         %highest found distance
         bestDistance = 0;

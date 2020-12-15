@@ -100,19 +100,17 @@ class LandmarkDetector(object):
 
 
 def main():
-    # Toggle run locally - run on FloydHub
-    isRunningLocally = True
 
-    ## Run locally
-    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated"
-    model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth"
+    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData"
+    #model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_length1.pth" #trym pre-trained
+
+    #model weights from different training data - from floydhub
+    #model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_old.pth"
+    #model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_new.pth"
+    model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_mix1.pth"
+    #model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_mix2.pth"
+
     pal_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/pal.txt"
-
-    if not isRunningLocally:
-        ## Run on FloydHub
-        file_dir = "/testing_data"
-        model_path = "/pytorch_models/best_true_weights_Mapse_length1.pth"
-        pal_path = "/pal_text_file/pal.txt"
 
     # Field name in h5 file, RotatedVolumes = rotated y axis, MVCenterRotatedVolumes = rotated around MV center
     # Default value
@@ -131,8 +129,18 @@ def main():
         user_input = str(sys.argv[2])
         file_dir = user_input
 
+    threshold = None
+    if len(sys.argv) > 3:
+        user_input = str(sys.argv[3])
+        threshold = float(user_input)
+
+    if len(sys.argv) > 4:
+        user_input = str(sys.argv[4])
+        model_path = user_input
+
     print('Fieldname is: ', field_name)
     print('File path is: ', file_dir)
+    print('Model path is: ', model_path)
 
     model_seq_len = 1
     usePal = False
@@ -168,7 +176,11 @@ def main():
     #initialize the pipeline
     preprocess = PreProcessor(model_seq_len)
     landmark_detector = LandmarkDetector(model, model_seq_len)
-    postprocess = PostProcessor()
+
+    if threshold is not None:
+        postprocess = PostProcessor(None, None, None, threshold)
+    else:
+        postprocess = PostProcessor()
 
     pipeline = Pipeline(preprocess,landmark_detector,postprocess)
 
@@ -183,7 +195,7 @@ def main():
         file_path = os.path.join(file_dir, file)
 
         print(file)
-        raw_file = h5py.File(file_path, 'r')
+        raw_file = h5py.File(file_path, 'r+')
 
         #read the tissue images and transpose the coordinates
 
@@ -191,10 +203,14 @@ def main():
         # sequence = np.array(raw_file['tissue']['data'])
         # sequence = np.transpose(sequence, (2,1,0))
 
+        # check if file is rotated around mv center, skip if not
+        keys = raw_file.keys()
+        if not field_name in keys:
+            print("Skipped file ", file, "since it is not rotated around mv center.")
+            continue
+
         #iterate through all rotations
         for rotated_field in raw_file[field_name]:
-            raw_file.close()
-            raw_file = h5py.File(file_path, 'r')
 
             print(rotated_field)
 
@@ -207,10 +223,7 @@ def main():
             #run the pipeline
             ret_cor, left_movement, right_movement = pipeline(sequence)
 
-            raw_file.close()
-
             #write out the detected landmarks and their movement
-            raw_file = h5py.File(file_path, 'a')
 
             #get the hdf keys
             h5_keys = raw_file[field_name][rotated_field].keys()
@@ -230,6 +243,6 @@ def main():
             raw_file[field_name][rotated_field].create_dataset(
                 'MAPSE_right_movement', data=right_movement['y_complete'])
 
-            raw_file.close()
+        raw_file.close()
 
 main()

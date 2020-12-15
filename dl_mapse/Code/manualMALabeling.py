@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import argparse
+import sys
 
 #user input
 plt.ion()
@@ -11,8 +12,14 @@ parser.add_argument('-d', '--data-path')
 args = parser.parse_args()
 
 #or hard coded
-root_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/test_rotated"
-#root_dir = args.data_path
+root_dir = "/home/anderstask1/Documents/Kyb/Thesis/3d_ultrasound_data/AnnotateProcessingFiles"
+
+# User input file path (in order to mach matlab script from command line)
+if len(sys.argv) > 1:
+    root_dir = str(sys.argv[2])
+
+print('File path is: ', root_dir)
+print(sys.argv)
 
 #get the .h5 files in the directory
 processFiles = []
@@ -31,51 +38,62 @@ for i, file in enumerate(processFiles):
 
     print(file)
 
-    f_read = h5py.File(file_path, 'r')
+    f_read_write = h5py.File(file_path, 'r+')
 
-    tissue = np.array(f_read['tissue']['data'])
+    # get the hdf keys
+    h5_keys = f_read_write.keys()
 
-    ref_coord = np.empty(shape=(0,4))
-    imgs = np.empty(shape=(0,tissue.shape[1],tissue.shape[0]))
-    print(imgs.shape)
+    # create group in hdf5 file for annotations
+    if 'Annotations' in h5_keys:
+        del f_read_write['Annotations']
+    f_read_write.create_group('Annotations')
 
-    coordinates = [(0,0),(0,0),(0,0)]
+    # iterate through all rotations
+    for counter, rotated_field in enumerate(f_read_write['MVCenterRotatedVolumes']):
 
-    for i in range(tissue.shape[2]):
-        plt.imshow(np.transpose(tissue[:,:,i]), cmap='gray')
-        plt.pause(0.01)
-        plt.clf()
-        print(i)
+        tissue = np.array(f_read_write['MVCenterRotatedVolumes'][rotated_field]['images'])
 
-    for i in range(tissue.shape[2]):
-        plt.imshow(np.transpose(tissue[:,:,i]), cmap='gray')
-        imgs = np.append(imgs, [np.transpose(tissue[:,:,i])], axis=0)
+        ref_coord = np.empty(shape=(0,4))
+        imgs = np.empty(shape=(0,tissue.shape[1],tissue.shape[2]))
+        print(rotated_field)
+        print('File: ', counter, '/', len(f_read_write['MVCenterRotatedVolumes']))
 
-        fig = plt.gcf()
-        fig.set_size_inches(10,10)
+        coordinates = [(0,0),(0,0),(0,0)]
 
-        coordinates = plt.ginput(n=3, timeout=0, show_clicks=True)
-        plt.clf()
-        plt.scatter(coordinates[0][0], coordinates[0][1], color='b', marker='*', alpha=0.2)
-        plt.scatter(coordinates[1][0], coordinates[1][1], color='b', marker='*', alpha=0.2)
+        for i in range(tissue.shape[0]):
+            plt.imshow(np.transpose(tissue[i,:,:]), cmap='gray')
+            plt.pause(0.01)
+            plt.clf()
 
-        ref_coord = np.append(ref_coord, np.array([[coordinates[0][0],
-                                                    coordinates[0][1],
-                                                    coordinates[1][0],
-                                                    coordinates[1][1]]]), axis=0)
-        print(ref_coord)
-    patient_num = int(args.data_path.split('/')[-2][-1])
-    fname_write = os.path.join(root_dir, f"p{patient_num}_4c4.h5")
-    f_write = h5py.File(fname_write, 'w')
+        for i in range(tissue.shape[0]):
+            plt.imshow(np.transpose(tissue[i,:,:]), cmap='gray')
 
-    imgs = f_write.create_dataset("images", data=imgs)
-    ref_coord = f_write.create_dataset("reference", data=ref_coord)
+            fig = plt.gcf()
+            fig.set_size_inches(10,10)
 
-    fpath_write = os.path.join(root_dir, args.data_path.split('/')[-2:][0])
-    if not os.path.exists(fpath_write):
-        os.mkdir(fpath_write)
-    fname_write = os.path.join(fpath_write, args.data_path.split('/')[-2:][1])
-    f_write = h5py.File(fname_write, 'w')
+            coordinates = plt.ginput(n=2, timeout=0, show_clicks=True)
+            plt.clf()
+            plt.scatter(coordinates[0][0], coordinates[0][1], color='b', marker='*', alpha=0.2)
+            plt.scatter(coordinates[1][0], coordinates[1][1], color='b', marker='*', alpha=0.2)
 
-    imgs = f_write.create_dataset("images", data=imgs)
-    ref_coord = f_write.create_dataset("reference", data=ref_coord)
+            ref_coord = np.append(ref_coord, np.array([[coordinates[0][0],
+                                                        coordinates[0][1],
+                                                        coordinates[1][0],
+                                                        coordinates[1][1]]]), axis=0)
+
+        # get the hdf keys
+        h5_keys = f_read_write['Annotations'].keys()
+
+        #create group in hdf5 file for annotations
+        if rotated_field in h5_keys:
+            del f_read_write['Annotations'][rotated_field]
+        f_read_write['Annotations'].create_group(rotated_field)
+
+        # get the hdf keys
+        h5_keys = f_read_write['Annotations'][rotated_field].keys()
+
+        if 'ref_coord' in h5_keys:
+            del f_read_write['Annotations'][rotated_field]['ref_coord']
+        f_read_write['Annotations'][rotated_field].create_dataset('ref_coord', data=ref_coord)
+
+    f_read_write.close()

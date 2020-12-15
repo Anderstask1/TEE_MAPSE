@@ -88,6 +88,18 @@ def train_model(model, device, dataloaders, criterion, optimizer, seq_type, num_
 
                     if (i+1)%(int(0.1*len(dataloaders[phase].dataset)/sample_batch['landmarks'].shape[0]))==0:
 
+                        if phase == 'train':
+                            print('{{"metric": "loss", "value": {}, "epoch": {}}}'.format(
+                                running_loss / ((i + 1) * sample_batch['landmarks'].shape[0]), epoch))
+                            print('{{"metric": "accuracy", "value": {}, "epoch": {}}}'.format(
+                                (running_detect_acc * 2.0) / (running_noise_tn + running_noise_fn + eps), epoch))
+                        else:
+                            print('{{"metric": "Validation loss", "value": {}, "epoch": {}}}'.format(
+                                running_loss / ((i + 1) * sample_batch['landmarks'].shape[0]), epoch))
+                            print('{{"metric": "Validation accuracy", "value": {}, "epoch": {}}}'.format(
+                                (running_detect_acc * 2.0) / (running_noise_tn + running_noise_fn + eps), epoch))
+
+
                         print("Loss: {:.3f}".format(running_loss/((i+1) * sample_batch['landmarks'].shape[0])))
                         print("Detection accuracy: {:.3f}".format((running_detect_acc*2.0)/(running_noise_tn+running_noise_fn+eps)))
                         print("Noise (tp, tn, fp, fn): {}, {}, {}, {}".format(running_noise_tp,
@@ -122,13 +134,15 @@ def train_model(model, device, dataloaders, criterion, optimizer, seq_type, num_
             torch.save({
                 'epoch':epoch,
                 'train_info':train_info,
-                'val_info':val_info}, "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/training_info.pth")
+                #'val_info':val_info}, "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/training_info.pth")
+                'val_info': val_info}, "/output/training_info.pth")
             if phase == 'val' and epoch_true_acc<=best_true_acc and epoch_true_acc>0.0:
                 torch.save({
                     'epoch':epoch,
                     'model_state_dict':model.state_dict(),
                     # Edit this path
-                    'optimizer_state_dict':optimizer.state_dict()}, "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights.pth")
+                    #'optimizer_state_dict':optimizer.state_dict()}, "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights.pth")
+                    'optimizer_state_dict': optimizer.state_dict()}, "/output/best_true_weights.pth")
                 best_true_acc = epoch_true_acc
                 print("True weights saved")
             if phase == 'val' and epoch_detect_acc<=best_acc:
@@ -136,7 +150,8 @@ def train_model(model, device, dataloaders, criterion, optimizer, seq_type, num_
                     'epoch':epoch,
                     'model_state_dict':model.state_dict(),
                     # Edit this path
-                    'optimizer_state_dict':optimizer.state_dict()}, "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_weights.pth")
+                    #'optimizer_state_dict':optimizer.state_dict()}, "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_weights.pth")
+                    'optimizer_state_dict': optimizer.state_dict()}, "/output/best_weights.pth")
                 best_acc = epoch_detect_acc
                 print("Weights saved")
     print()

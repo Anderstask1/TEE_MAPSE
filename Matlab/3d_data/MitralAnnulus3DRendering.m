@@ -1,161 +1,103 @@
 %Extract MV Landmarks and plot all points of MV Annulus - first frame
 %Author: Anders Tasken
-%Started 29.09.2020mapseLeft3D_inv_trf
+%Started 29.09.2020
 
-function MitralAnnulus3DRendering(hdfdata, leftLandmarkSplineCurve, rightLandmarkSplineCurve, leftLandmarkBezierCurve, rightLandmarkBezierCurve, mapseLeft3DMatrix, mapseRight3DMatrix, frameNo, name, filesPath, saveScatterplot, saveLineplot, saveSplineInterpPlot, saveBezierInterpPlot)
-    %% Frame used to render single annnulus plot
-    frame = 1;
+function MitralAnnulus3DRendering(fileNames)
+    %call the MAPSE postprocessing script for each file
+    for f=1:size(fileNames,2)
+        %root name from h5 file
+        [filesPath, name, ~] = fileparts(fileNames(f).name);
 
-    %% Use 3d coordinates of right and left mv landmark for 180 degrees rotation to construct 3d render of Mitral Annulus
+        %% Load data   
+        %show progress
+        fprintf('Loaded file with name: %s. \n', name);
 
-    %create folder for figure
-    directoryPath = strcat(filesPath, 'PostProcessMVAnnulusFigures/');
-    if ~exist(directoryPath, 'dir')
-        % Folder does not exist so create it.
-        mkdir(directoryPath);
-    end
-    
-    %create folder for figure
-    directoryPath = strcat(directoryPath, name, '/');
-    if ~exist(directoryPath, 'dir')
-        % Folder does not exist so create it.
-        mkdir(directoryPath);
-    end
-
-    %% Scatterplot -first frame
-    if saveScatterplot
+        %load data
+        fileName = strcat(name,'.h5'); 
+        filePath = strcat(filesPath, fileName);
+        hdfdata = HdfImport(filePath);
         
+        %number of frames
+        frameNo = length(fieldnames(hdfdata.CartesianVolumes));
+        
+        %load optMapseAngles
+        filename = strcat(filesPath, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');
+        optMapseAngle = load(filename, 'optMapseAngle').optMapseAngle;
+
+        %skip iteration if optimal angle is 0 (most likely due to no landmarks)
+        if optMapseAngle == 0
+            fprintf('Optimal mapse angle is 0, skipping iteration with file %s \n', name);
+            continue
+        end
+        
+        blueColor = [0, 0.4470, 0.7410];
+        orangeColor = [0.8500, 0.3250, 0.0980];
+        yellowColor = [0.9290, 0.6940, 0.1250];
+        greenColor = [0.4660, 0.6740, 0.1880];
+        lightBlueColor = [0.3010, 0.7450, 0.9330];
+        brownColor = [0.6350, 0.0780, 0.1840];
+        purpleColor = [0.4940, 0.1840, 0.5560];
+        
+        %% Load landmark variable matrices
+        variablesFilename = strcat(filesPath, 'LandmarkMatricesVariables/landmarkMatrices_', name);
+        
+        load(variablesFilename,...
+            'leftLandmarkSplineCurve', 'rightLandmarkSplineCurve', 'annotatedLeftSplineCurve', 'annotatedRightSplineCurve',...
+            'leftLandmarkBezierCurve', 'rightLandmarkBezierCurve', 'annotatedLeftBezierCurve', 'annotatedRightBezierCurve',...
+            'landmarkLeft3DMatrix', 'landmarkRight3DMatrix', 'annotatedLeft3DMatrix', 'annotatedRight3DMatrix',...
+            'rejectedLandmarkLeft3DMatrix', 'rejectedLandmarkRight3DMatrix', ...
+            'landmarkMean3DMatrix', 'meanSplineCurve', 'meanBezierCurve');
+
+         %% Frame used to render single annnulus plot
+        frame = 1;
+
+        %% Use 3d coordinates of right and left mv landmark for 180 degrees rotation to construct 3d render of Mitral Annulus
+
+        %create folder for figure
+        directoryPath = strcat(filesPath, 'PostProcessMVAnnulusFigures/');
+        if ~exist(directoryPath, 'dir')
+            % Folder does not exist so create it.
+            mkdir(directoryPath);
+        end
+
+        %create folder for figure
+        directoryPath = strcat(directoryPath, name, '/');
+        if ~exist(directoryPath, 'dir')
+            % Folder does not exist so create it.
+            mkdir(directoryPath);
+        end
+        
+        %% Scatterplot of landmarks and rejected landmarks
         scatterFig = figure('visible','off');
-
-        %plot right landmarks
-        scatter3(mapseRight3DMatrix(1,:,frame), mapseRight3DMatrix(2,:,frame), mapseRight3DMatrix(3,:,frame));
-
-        hold on
-
-        %plot left landmarks
-        scatter3(mapseLeft3DMatrix(1,:,frame), mapseLeft3DMatrix(2,:,frame), mapseLeft3DMatrix(3,:,frame));
-
-        hold off
-
-        %figure title
-        scatterFigName = strcat('Scatterplot of frame: - ', frame,'- with name: -', name);
-        title(scatterFigName)
-
-        %save figure
-        scatterFigName = strcat(directoryPath, name,'_frame_', int2str(frame), '_scatterplot3D.fig');
-        savefig(scatterFig, scatterFigName)
-    end
-
-    %% Lineplot -first frame
-    if saveLineplot
         
-        lineFig = figure('visible','off');
-
-        plot3(mapseLeft3DMatrix(1,:,frame), mapseLeft3DMatrix(2,:,frame), mapseLeft3DMatrix(3,:,frame));
-
-        hold on;
-
-        plot3(mapseRight3DMatrix(1,:,frame), mapseRight3DMatrix(2,:,frame), mapseRight3DMatrix(3,:,frame));
-
+        %plot scatter landmarks
+        scatter3(landmarkLeft3DMatrix(1,:,frame), landmarkLeft3DMatrix(2,:,frame), landmarkLeft3DMatrix(3,:,frame), 'o', 'MarkerEdgeColor', blueColor); hold on
+        scatter3(landmarkRight3DMatrix(1,:,frame), landmarkRight3DMatrix(2,:,frame), landmarkRight3DMatrix(3,:,frame), 'o', 'MarkerEdgeColor', orangeColor);
+        
+        %plot scatter landmarks rejected
+        scatter3(rejectedLandmarkLeft3DMatrix(1,:,frame), rejectedLandmarkLeft3DMatrix(2,:,frame), rejectedLandmarkLeft3DMatrix(3,:,frame), '*', 'MarkerEdgeColor', yellowColor);
+        scatter3(rejectedLandmarkRight3DMatrix(1,:,frame), rejectedLandmarkRight3DMatrix(2,:,frame), rejectedLandmarkRight3DMatrix(3,:,frame), '*', 'MarkerEdgeColor', greenColor);
+        
+        %plot bezier curve
+        plot3(leftLandmarkBezierCurve(:,1,frame),leftLandmarkBezierCurve(:,2,frame),leftLandmarkBezierCurve(:,3,frame), 'LineWidth', 3, 'Color', blueColor);
+        plot3(rightLandmarkBezierCurve(:,1,frame),rightLandmarkBezierCurve(:,2,frame),rightLandmarkBezierCurve(:,3,frame), 'LineWidth', 3, 'Color', orangeColor);hold off
+        
         xlabel('x');
         ylabel('y');    
         zlabel('z');
-
-        %figure title
-        lineFigName = strcat('Lineplot of frame: - ', int2str(frame),'- with name: -', name);
-        title(lineFigName)
-
-        %save figure
-        lineFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_lineplot3D.fig');
-        savefig(lineFig, lineFigName)
-
-        %----------- add to 2d perpendicular slices to the volume ---------
-        %get volume data of frame
-        volumeFieldName = strcat('vol0', int2str(frame));
-        if frame > 9
-            volumeFieldName = strcat('vol', int2str(frame));
-        end
-        volumeData = hdfdata.CartesianVolumes.(volumeFieldName);
-
-        %get volume size
-        volumeSize = size(volumeData);
-
-        %get image from first frame in sequence, remove dimension of length 1
-        slice = squeeze(volumeData(:,round(volumeSize(2)/2),:))';
-
-        xImage = [0 volumeSize(1);0 volumeSize(1)];   % The x data for the image corners
-        yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
-        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
-        surf(xImage,yImage,zImage,...    % Plot the surface
-         'CData',slice,...
-         'FaceColor','texturemap');
-        colormap('gray');
         
-        %get image from first frame in sequence, remove dimension of length 1
-        slice = squeeze(volumeData(round(volumeSize(1)/2),:,:))';
-
-        xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
-        yImage = [0 volumeSize(2);0 volumeSize(2)]; % The y data for the image corners
-        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
-        surf(xImage,yImage,zImage,...    % Plot the surface
-         'CData',slice,...
-         'FaceColor','texturemap');
-        colormap('gray');
-
-        hold off;
-        
-        %save figure
-        lineFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_lineplot3D_with_slices.fig');
-        savefig(lineFig, lineFigName)
-    end
-
-    %% Lineplot of all frames
-    if saveLineplot
-        
-        lineFrameFig = figure('visible','off');
-
-        for j = 1 : frameNo
-
-            plot3(mapseLeft3DMatrix(1,:,j), mapseLeft3DMatrix(2,:,j), mapseLeft3DMatrix(3,:,j));
-
-            hold on
-
-        end
-
-        hold off
-
-        %figure title
-        lineFigName = strcat('Lineplot of: -', name);
-        title(lineFigName)
-
-        %save figure
-        lineFrameFigName = strcat(directoryPath, name,'_lineplot3D_all_frames.fig');
-        savefig(lineFrameFig, lineFrameFigName)
-    end
-    
-    %% Plot of interpolated annulus - first frame
-    if saveSplineInterpPlot
-        
-        interpFigure = figure('visible','off');
-        
-        fnplt(leftLandmarkSplineCurve(frame),2);
-        
-        hold on
-        fnplt(rightLandmarkSplineCurve(frame),2);
+        legend('Left scatter', 'Right scatter', 'Left rejected scatter', 'Right rejected scatter');
         
         %figure title
-        interpFigName = strcat('Spline interpolation plot of: -', name);
-        title(interpFigName);
+        interpTitleName = strcat('Scatterplot of frame: - ', int2str(frame),'- with name: -', name);
+        title(interpTitleName)
 
         %save figure
-        interpFrameFigName = strcat(directoryPath, name,'_frame_', int2str(frame), '_spline_interpolation-plot3D.fig');
-        savefig(interpFigure, interpFrameFigName);
-        
-        %save 2d image of figure
-        %change view 
-        view(320, 32);
-        interpFrameImageName = strcat(directoryPath, name,'_spline_interpolation-frame3D.png');
-        saveas(gca, interpFrameImageName);
+        scatterFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_scatterfig_rejected.fig');
+        savefig(scatterFig, scatterFigName)
+
+        %% Lineplot -first frame
+        lineFig = figure('visible','off');
         
         %----------- add to 2d perpendicular slices to the volume ---------
         %get volume data of frame
@@ -169,18 +111,18 @@ function MitralAnnulus3DRendering(hdfdata, leftLandmarkSplineCurve, rightLandmar
         volumeSize = size(volumeData);
 
         %get image from first frame in sequence, remove dimension of length 1
-        slice = squeeze(volumeData(:,round(volumeSize(2)/2),:))';
+        slice = squeeze(volumeData(round(volumeSize(2)/2),:,:))';
 
         xImage = [0 volumeSize(1); 0 volumeSize(1)];   % The x data for the image corners
         yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
         zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
         surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',slice,...
-         'FaceColor','texturemap');
+         'FaceColor','texturemap'); hold on
         colormap('gray');
-        
+
         %get image from first frame in sequence, remove dimension of length 1
-        slice = squeeze(volumeData(round(volumeSize(1)/2),:,:))';
+        slice = squeeze(volumeData(:,round(volumeSize(1)/2),:))';
 
         xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
         yImage = [0 volumeSize(2); 0 volumeSize(2)]; % The y data for the image corners
@@ -190,78 +132,37 @@ function MitralAnnulus3DRendering(hdfdata, leftLandmarkSplineCurve, rightLandmar
          'FaceColor','texturemap');
         colormap('gray');
         
-        hold off
+        alpha 0.6
         
-        %save figure
-        interpFrameFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_spline_interpolation-plot3D_with_slices.fig');
-        savefig(interpFigure, interpFrameFigName);
-    end
-    
-    %% Plot of interpolated annulus - all frames - left
-    if saveSplineInterpPlot
-        
-        interpAllFramesFigure = figure('visible','off');
-        
-        for f = 1 : frameNo
-            fnplt(leftLandmarkSplineCurve(f),2);
-            hold on 
-        end
-        
-        hold off
-        
-        %figure title
-        interpFigName = strcat('Spline interpolation left plot (all frames) of: -', name);
-        title(interpFigName);
+        %---------------------- plot landmarks --------------------
+        %for frame = 1 : frameNo
+            plot3(landmarkLeft3DMatrix(1,:,frame), landmarkLeft3DMatrix(2,:,frame), landmarkLeft3DMatrix(3,:,frame), 'LineWidth', 3, 'Color', blueColor);
+            plot3(landmarkRight3DMatrix(1,:,frame), landmarkRight3DMatrix(2,:,frame), landmarkRight3DMatrix(3,:,frame), 'LineWidth', 3, 'Color', orangeColor);
+        %end
+        % annotated data
+        plot3(annotatedLeft3DMatrix(1,:,frame), annotatedLeft3DMatrix(2,:,frame), annotatedLeft3DMatrix(3,:,frame), '-', 'LineWidth', 3, 'Color', yellowColor);
+        plot3(annotatedRight3DMatrix(1,:,frame), annotatedRight3DMatrix(2,:,frame), annotatedRight3DMatrix(3,:,frame), '-', 'LineWidth', 3, 'Color', greenColor);
 
-        %save figure
-        interpFrameFigName = strcat(directoryPath, name,'_spline_interpolation-plot3D_left_all-frames.fig');
-        savefig(interpAllFramesFigure, interpFrameFigName);
-    end
-    
-    %% Plot of interpolated annulus - all frames - right
-    if saveSplineInterpPlot
-        
-        interpAllFramesFigure = figure('visible','off');
-        
-        for f = 1 : frameNo
-            fnplt(rightLandmarkSplineCurve(f),2);
-            hold on 
-        end
-        
-        hold off
-        
-        %figure title
-        interpFigName = strcat('Spline interpolation right plot (all frames) of: -', name);
-        title(interpFigName);
+        %plot landmarks scatter
+        scatter3(landmarkLeft3DMatrix(1,:,frame), landmarkLeft3DMatrix(2,:,frame), landmarkLeft3DMatrix(3,:,frame), 'MarkerEdgeColor', blueColor);
+        scatter3(landmarkRight3DMatrix(1,:,frame), landmarkRight3DMatrix(2,:,frame), landmarkRight3DMatrix(3,:,frame), 'MarkerEdgeColor', orangeColor);
 
-        %save figure
-        interpFrameFigName = strcat(directoryPath, name,'_spline_interpolation-plot3D_right_all-frames.fig');
-        savefig(interpAllFramesFigure, interpFrameFigName);
-    end
-    
-    %% Plot Bezier interpolated annulus
-    if saveBezierInterpPlot
-       
-        interpFig = figure('visible','off');
-        
-        plot3(leftLandmarkBezierCurve(:,1,frame),leftLandmarkBezierCurve(:,2,frame),leftLandmarkBezierCurve(:,3,frame));
-        
-        hold on
-        
-        plot3(rightLandmarkBezierCurve(:,1,frame),rightLandmarkBezierCurve(:,2,frame),rightLandmarkBezierCurve(:,3,frame));
-        
+        legend('Y-axis slice of original volume', 'X-axis slice of original volume',...
+            'Left landmarks', 'Right landmarks', 'Left annotation', 'Right annotation', 'Left scatter', 'Right scatter');
+
         xlabel('x');
         ylabel('y');    
         zlabel('z');
-
-        %figure title
-        interpTitleName = strcat('Bezier interpolation of frame: - ', int2str(frame),'- with name: -', name);
-        title(interpTitleName)
+        
+        title(name)
 
         %save figure
-        interpFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_bezier_interpolation_3D.fig');
-        savefig(interpFig, interpFigName)
+        lineFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_lineplot3D_with_slices.fig');
+        savefig(lineFig, lineFigName)
 
+        %% Plot of interpolated annulus - frame
+        interpFigure = figure('visible','off');
+        
         %----------- add to 2d perpendicular slices to the volume ---------
         %get volume data of frame
         volumeFieldName = strcat('vol0', int2str(frame));
@@ -274,18 +175,88 @@ function MitralAnnulus3DRendering(hdfdata, leftLandmarkSplineCurve, rightLandmar
         volumeSize = size(volumeData);
 
         %get image from first frame in sequence, remove dimension of length 1
-        slice = squeeze(volumeData(:,round(volumeSize(2)/2),:))';
+        slice = squeeze(volumeData(round(volumeSize(2)/2),:,:))';
 
-        xImage = [0 volumeSize(1);0 volumeSize(1)];   % The x data for the image corners
+        xImage = [0 volumeSize(1); 0 volumeSize(1)];   % The x data for the image corners
         yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
+        surf(xImage,yImage,zImage,...    % Plot the surface
+         'CData',slice,...
+         'FaceColor','texturemap'); hold on
+        colormap('gray');
+
+        %get image from first frame in sequence, remove dimension of length 1
+        slice = squeeze(volumeData(:,round(volumeSize(1)/2),:))';
+
+        xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
+        yImage = [0 volumeSize(2); 0 volumeSize(2)]; % The y data for the image corners
         zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
         surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',slice,...
          'FaceColor','texturemap');
         colormap('gray');
         
+        alpha 0.8
+        
+        %---------------------- plot landmarks --------------------
+
+        fnplt(rightLandmarkSplineCurve(frame), 2);
+        fnplt(leftLandmarkSplineCurve(frame), 2);
+
+        %annotated spline
+        fnplt(annotatedLeftSplineCurve(frame), 2, yellowColor);
+        fnplt(annotatedRightSplineCurve(frame), 2, greenColor);
+
+        %plot landmarks scatter
+        scatter3(landmarkLeft3DMatrix(1,:,frame), landmarkLeft3DMatrix(2,:,frame), landmarkLeft3DMatrix(3,:,frame), 'MarkerEdgeColor', orangeColor);
+        scatter3(landmarkRight3DMatrix(1,:,frame), landmarkRight3DMatrix(2,:,frame), landmarkRight3DMatrix(3,:,frame), 'MarkerEdgeColor', blueColor);
+
+        legend('Y-axis slice of original volume', 'X-axis slice of original volume',...
+            'Left landmarks', 'Right landmarks', 'Left annotation', 'Right annotation', 'Left scatter', 'Right scatter');
+
+        %figure title
+        interpTitleName = strcat('Spline interpolation of frame: - ', int2str(frame),'- with name: -', name);
+        title(interpTitleName)
+
+        %save 2d image of figure
+        %change view 
+        view(320, 32);
+        interpFrameImageName = strcat(directoryPath, name,'_spline_interpolation-frame3D.png');
+        saveas(gca, interpFrameImageName);
+
+        hold off
+
+        %save figure
+        interpFrameFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_spline_interpolation-plot3D_with_slices.fig');
+        savefig(interpFigure, interpFrameFigName);
+
+        %% Plot Bezier interpolated annulus
+        interpFig = figure('visible','off');
+        
+        %----------- add to 2d perpendicular slices to the volume ---------
+        %get volume data of frame
+        volumeFieldName = strcat('vol0', int2str(frame));
+        if frame > 9
+            volumeFieldName = strcat('vol', int2str(frame));
+        end
+        volumeData = hdfdata.CartesianVolumes.(volumeFieldName);
+
+        %get volume size
+        volumeSize = size(volumeData);
+
         %get image from first frame in sequence, remove dimension of length 1
-        slice = squeeze(volumeData(round(volumeSize(1)/2),:,:))';
+        slice = squeeze(volumeData(round(volumeSize(2)/2),:,:))';
+
+        xImage = [0 volumeSize(1);0 volumeSize(1)];   % The x data for the image corners
+        yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
+        surf(xImage,yImage,zImage,...    % Plot the surface
+         'CData',slice,...
+         'FaceColor','texturemap'); hold on
+        colormap('gray');
+        
+        %get image from first frame in sequence, remove dimension of length 1
+        slice = squeeze(volumeData(:,round(volumeSize(1)/2),:))';
 
         xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
         yImage = [0 volumeSize(2);0 volumeSize(2)]; % The y data for the image corners
@@ -294,12 +265,266 @@ function MitralAnnulus3DRendering(hdfdata, leftLandmarkSplineCurve, rightLandmar
          'CData',slice,...
          'FaceColor','texturemap');
         colormap('gray');
+        
+        alpha 0.8
+        
+        %---------------------- plot landmarks --------------------
+
+        %bezier landmarks
+        plot3(leftLandmarkBezierCurve(:,1,frame),leftLandmarkBezierCurve(:,2,frame),leftLandmarkBezierCurve(:,3,frame), 'LineWidth', 3, 'Color', blueColor);
+        plot3(rightLandmarkBezierCurve(:,1,frame),rightLandmarkBezierCurve(:,2,frame),rightLandmarkBezierCurve(:,3,frame), 'LineWidth', 3, 'Color', orangeColor);
+
+        %annotated
+        plot3(annotatedLeftBezierCurve(:,1,frame),annotatedLeftBezierCurve(:,2,frame),annotatedLeftBezierCurve(:,3,frame), '-', 'LineWidth', 3, 'Color', yellowColor);
+        plot3(annotatedRightBezierCurve(:,1,frame),annotatedRightBezierCurve(:,2,frame),annotatedRightBezierCurve(:,3,frame), '-', 'LineWidth', 3, 'Color', greenColor);
+
+        %plot landmarks scatter
+        scatter3(landmarkLeft3DMatrix(1,:,frame), landmarkLeft3DMatrix(2,:,frame), landmarkLeft3DMatrix(3,:,frame), 'MarkerEdgeColor', blueColor);
+        scatter3(landmarkRight3DMatrix(1,:,frame), landmarkRight3DMatrix(2,:,frame), landmarkRight3DMatrix(3,:,frame), 'MarkerEdgeColor', orangeColor);
+
+        xlabel('x');
+        ylabel('y');    
+        zlabel('z');
+
+        legend('Y-axis slice of original volume', 'X-axis slice of original volume',...
+            'Left landmarks', 'Right landmarks', 'Left annotation', 'Right annotation', 'Left scatter', 'Right scatter');
+
+        %figure title
+        interpTitleName = strcat('Bezier interpolation of frame: - ', int2str(frame),'- with name: -', name);
+        title(interpTitleName)
 
         hold off;
-        
+
         %save figure
         interpFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_bezier_interpolation_3D_with_slices.fig');
         savefig(interpFig, interpFigName)
+
+        %% Plot of mean scatter, spline and bezier
+        meanFig = figure('visible','off');
         
+        %----------- add to 2d perpendicular slices to the volume ---------
+        %get volume data of frame
+        volumeFieldName = strcat('vol0', int2str(frame));
+        if frame > 9
+            volumeFieldName = strcat('vol', int2str(frame));
+        end
+        volumeData = hdfdata.CartesianVolumes.(volumeFieldName);
+
+        %get volume size
+        volumeSize = size(volumeData);
+
+        %get image from first frame in sequence, remove dimension of length 1
+        slice = squeeze(volumeData(round(volumeSize(2)/2),:,:))';
+
+        xImage = [0 volumeSize(1);0 volumeSize(1)];   % The x data for the image corners
+        yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
+        surf(xImage,yImage,zImage,...    % Plot the surface
+         'CData',slice,...
+         'FaceColor','texturemap'); hold on
+        colormap('gray');
+        
+        %get image from first frame in sequence, remove dimension of length 1
+        slice = squeeze(volumeData(:,round(volumeSize(1)/2),:))';
+
+        xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
+        yImage = [0 volumeSize(2);0 volumeSize(2)]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
+        surf(xImage,yImage,zImage,...    % Plot the surface
+         'CData',slice,...
+         'FaceColor','texturemap');
+        colormap('gray');
+        
+        alpha 0.8
+        
+        %---------------------- plot landmarks --------------------
+        
+        %spline landmarks
+        fnplt(meanSplineCurve(frame), 2);
+        
+        %annotated
+        plot3(annotatedLeftBezierCurve(:,1,frame),annotatedLeftBezierCurve(:,2,frame),annotatedLeftBezierCurve(:,3,frame), '-', 'LineWidth', 3, 'Color', yellowColor);
+        plot3(annotatedRightBezierCurve(:,1,frame),annotatedRightBezierCurve(:,2,frame),annotatedRightBezierCurve(:,3,frame), '-', 'LineWidth', 3, 'Color', greenColor);
+
+        %bezier landmarks
+        plot3(meanBezierCurve(:,1,frame), meanBezierCurve(:,2,frame), meanBezierCurve(:,3,frame), 'LineWidth', 3, 'Color', orangeColor);
+        
+        %plot landmarks scatter
+        scatter3(landmarkMean3DMatrix(1,:,frame), landmarkMean3DMatrix(2,:,frame), landmarkMean3DMatrix(3,:,frame), 'MarkerEdgeColor', lightBlueColor);
+
+        xlabel('x');
+        ylabel('y');    
+        zlabel('z');
+
+        legend('Y-axis slice of original volume', 'X-axis slice of original volume',...
+            'Mean Spline landmarks', 'Left annotation', 'Right annotation',  'Mean Bezier landmarks', 'Mean Scatter');
+
+        %figure title
+        meanTitleName = strcat('Mean bezier, spline and scatter of frame: - ', int2str(frame),'- with name: -', name);
+        title(meanTitleName); hold off;
+
+        %save figure
+        meanFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_mean_scatter_spline_bezier_3D_with_slices.fig');
+        savefig(meanFig, meanFigName)
+        
+        %% Create movie of annulus though all frames -raw
+
+        %open mp4
+        movieName = strcat(directoryPath, name, '_raw_annulus_movie.avi');
+        mapseVideo = VideoWriter(movieName);
+        mapseVideo.FrameRate = 2;
+        mapseVideo.Quality = 100;
+        open(mapseVideo)
+
+        movieFig = figure('visible','off');
+
+        %loop through the frames
+        for f = 1:size(leftLandmarkSplineCurve, 2)
+
+            plot3(landmarkRight3DMatrix(1,:,f), landmarkRight3DMatrix(2,:,f), landmarkRight3DMatrix(3,:,f), 'LineWidth', 3, 'Color', orangeColor); hold on
+            plot3(annotatedRight3DMatrix(1,:,f), annotatedRight3DMatrix(2,:,f), annotatedRight3DMatrix(3,:,f), '-', 'LineWidth', 3, 'Color', greenColor); hold off
+
+            %change view
+            view(320, 32);
+
+            xlabel('x');
+            ylabel('y');    
+            zlabel('z');
+            
+            %store first axis limits, and set the rest
+            if f == 1
+                ax = gca;
+                xAxis = ax.XLim;
+                yAxis = ax.YLim;
+                zAxis = ax.ZLim;
+            end
+            
+            padding = [-10 10];
+            xlim(xAxis + padding);
+            ylim(yAxis + padding);
+            zlim(zAxis + [-20 20]);
+            
+            legend('Landmark Raw Right','Annotated Raw Right');
+
+            drawnow
+
+            frame = getframe(gcf);
+            writeVideo(mapseVideo, frame);
+        end
+
+        %figure title
+        movieTitle = strcat('Raw landmark movie of name: -', name);
+        title(movieTitle)
+
+        %cleanup
+        close(mapseVideo)
+        close(movieFig)
+
+        %% Create movie of annulus though all frames -bezier
+
+        %open mp4
+        movieName = strcat(directoryPath, name, '_bezier_annulus_movie.avi');
+        mapseVideo = VideoWriter(movieName);
+        mapseVideo.FrameRate = 2;
+        mapseVideo.Quality = 100;
+        open(mapseVideo)
+
+        movieFig = figure('visible','off');
+
+        %loop through the frames
+        for f = 1:size(leftLandmarkSplineCurve, 2)
+
+            plot3(rightLandmarkBezierCurve(:,1,f),rightLandmarkBezierCurve(:,2,f),rightLandmarkBezierCurve(:,3,f), 'LineWidth', 3, 'Color', orangeColor); hold on;
+            plot3(annotatedRightBezierCurve(:,1,f),annotatedRightBezierCurve(:,2,f),annotatedRightBezierCurve(:,3,f), '-', 'LineWidth', 3, 'Color', greenColor); hold off
+
+            %change view 
+            view(320, 32);
+
+            xlabel('x');
+            ylabel('y');    
+            zlabel('z');
+            
+            %store first axis limits, and set the rest
+            if f == 1
+                ax = gca;
+                xAxis = ax.XLim;
+                yAxis = ax.YLim;
+                zAxis = ax.ZLim;
+            end
+            
+            padding = [-10 10];
+            xlim(xAxis + padding);
+            ylim(yAxis + padding);
+            zlim(zAxis + [-20 20]);
+            
+            legend('Landmark Bezier Right','Annotated Bezier Right');
+
+            drawnow
+
+            frame = getframe(gcf);
+            writeVideo(mapseVideo, frame);
+        end
+
+        %figure title
+        movieTitle = strcat('Bezier interpolation movie of name: -', name);
+        title(movieTitle)
+
+        %cleanup
+        close(mapseVideo)
+        close(movieFig)
+
+
+        %% Create movie of annulus though all frames -spline
+
+        %open mp4
+        movieName = strcat(directoryPath, name, '_spline_annulus_movie.avi');
+        mapseVideo = VideoWriter(movieName);
+        mapseVideo.FrameRate = 2;
+        mapseVideo.Quality = 100;
+        open(mapseVideo)
+
+        movieFig = figure('visible','off');
+
+        %loop through the frames
+        for f = 1:size(leftLandmarkSplineCurve, 2)
+
+            fnplt(rightLandmarkSplineCurve(f),2); hold on;
+            fnplt(annotatedRightSplineCurve(f),2); hold off
+
+            %change view 
+            view(320, 32);
+
+            xlabel('x');
+            ylabel('y');    
+            zlabel('z');
+            
+            %store first axis limits, and set the rest
+            if f == 1
+                ax = gca;
+                xAxis = ax.XLim;
+                yAxis = ax.YLim;
+                zAxis = ax.ZLim;
+            end
+            
+            padding = [-10 10];
+            xlim(xAxis + padding);
+            ylim(yAxis + padding);
+            zlim(zAxis + [-20 20]);
+            
+            legend('Landmark Spline Right','Annotated Spline Right');
+
+            drawnow
+
+            frame = getframe(gcf);
+            writeVideo(mapseVideo, frame);
+        end
+
+        %figure title
+        movieTitle = strcat('Spline interpolation movie of name: -', name);
+        title(movieTitle)
+
+        %cleanup
+        close(mapseVideo)
+        close(movieFig)
     end
 end

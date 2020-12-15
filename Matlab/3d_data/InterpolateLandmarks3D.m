@@ -18,6 +18,10 @@ function [landmarkSplineCurve, landmarkBezierCurve] = InterpolateLandmarks3D(lan
         xyz(:,isnan(xyz(3,:))) = [];
         
         %% interpolating cubic spline curve
+        if isempty(xyz)
+           xyz = zeros(size(landmark3DMatrix)); 
+        end
+        
         landmarkSplineCurve(f) = cscvn(xyz(:,[1:end 1]));
       
         %% Interpolating Bezier
@@ -36,8 +40,11 @@ function [landmarkSplineCurve, landmarkBezierCurve] = InterpolateLandmarks3D(lan
         cp{size(xyz,2) + 1} = xyz(:,1);
         
         %bezier curve points
-        [Xout,Yout,Zout] = BezierCurve(cp,U);
-        landmarkBezierCurve(:,:,f) = [Xout,Yout,Zout];
+        if size(xyz, 2) ~= 1 
+            [Xout,Yout,Zout] = BezierCurve(cp,U);
+            landmarkBezierCurve(:,:,f) = [Xout,Yout,Zout];
+        end
+        
         
     end
 end

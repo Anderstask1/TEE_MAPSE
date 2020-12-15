@@ -7,3 +7,14 @@ val/
 dl_mapse/Data
 test_rotated/
 *.h5
+test_old/
+test_new/
+test_mix1/
+test_raw-data/
+train_old/
+train_new/
+train_mix1/
+val_old/
+val_new/
+val_mix1/
+CurrentAnnotatingData/
