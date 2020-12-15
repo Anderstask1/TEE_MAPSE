@@ -4,6 +4,9 @@
 test2/
 train/
 val/
-dl_mapse/Data
+dl_mapse/Data/
+dl_mapse/Data_old/
+dl_mapse/Data_new/
+dl_mapse/Data_mix1/
 test_rotated/
 *.h5
