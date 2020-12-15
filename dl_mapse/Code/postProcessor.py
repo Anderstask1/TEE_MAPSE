@@ -10,10 +10,13 @@ import matplotlib.pyplot as plt
 
 class PostProcessor(object):
 
-    def __init__(self, coordinateExtract=None, rotate=None, peakDetect=None):
+    def __init__(self, coordinateExtract=None, rotate=None, peakDetect=None, threshold=None):
 
         if not coordinateExtract:
-            self.coordinateExtract = CoordinateExtractor()
+            if not threshold:
+                self.coordinateExtract = CoordinateExtractor()
+            else:
+                self.coordinateExtract = CoordinateExtractor(None, threshold)
         else:
             self.coordinateExtract = coordinateExtract
         if not rotate:
@@ -183,9 +186,13 @@ class PostProcessor(object):
 
 class CoordinateExtractor(object):
 
-    def __init__(self, method="centroid", threshold=0.5):
+    def __init__(self, method="centroid", threshold=None):
         self.method = method
-        self.threshold = threshold
+        print('Post-processor threshold is: ', threshold)
+        if not threshold:
+            self.threshold = 0.5
+        else:
+            self.threshold = threshold
 
     def __call__(self, predicted_pmap):
         coordinates = np.empty((predicted_pmap.shape[0], 2, 2))

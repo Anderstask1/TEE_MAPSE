@@ -13,9 +13,9 @@ from Models import resnet3d
 
 seq_type = "short"
 #seq_len = 3
-seq_len = 3
-batch_size = 32
-sigma = 3
+seq_len = 1 #best on nordal
+batch_size = 32 #used by nordal
+sigma = 3 #best on nordal
 
 print()
 print(" + Sequence length:\t{}".format(seq_len))
@@ -36,22 +36,23 @@ datasets = {
     'train':dataset.UltrasoundData("Project/Data/train/", seq_type, seq_len, transform=data_transforms['train']),
     'val':dataset.UltrasoundData("Project/Data/val/", seq_type, seq_len, transform=data_transforms['val'])}
 """
-"""
+
 datasets = {
-    'train':dataset.UltrasoundData("/floyd/input/us-data/train/", seq_type, seq_len, transform=data_transforms['train']),
-    'val':dataset.UltrasoundData("/floyd/input/us-data/val/", seq_type, seq_len, transform=data_transforms['val'])}
+    'train':dataset.UltrasoundData("/train/", seq_type, seq_len, transform=data_transforms['train']),
+    'val':dataset.UltrasoundData("/val/", seq_type, seq_len, transform=data_transforms['val'])}
 """
 datasets = {
     'train':dataset.UltrasoundData("/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/train/", seq_type, seq_len, transform=data_transforms['train']),
     'val':dataset.UltrasoundData("/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/val/", seq_type, seq_len, transform=data_transforms['val'])}
-
+"""
 dataloaders = {
     'train':DataLoader(datasets['train'], batch_size=batch_size, shuffle=True, num_workers=4),
     'val':DataLoader(datasets['val'], batch_size=1, shuffle=False, num_workers=4)}
 
 torch.backends.cudnn.benchmark = True
 #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-device = torch.device("cuda:0") # if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cpu")
 
 model = models.Model(seq_len)
 model = model.to(device)
