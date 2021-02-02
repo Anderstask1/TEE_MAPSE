@@ -299,7 +299,7 @@ class ToTensor(object):
             masks[1,:,:] = nd.gaussian_filter(masks[1,:,:], sigma=self.sigma, mode='constant')
             masks[1,:,:] = masks[1,:,:]/masks[1,:,:].max()
 
-        sample = {'images':torch.from_numpy(images).unsqueeze(0).float(),
+            sample = {'images':torch.from_numpy(images).unsqueeze(0).float(),
                   'landmarks':torch.from_numpy(landmarks).float(),
                   'masks':torch.from_numpy(masks).float()}
 
