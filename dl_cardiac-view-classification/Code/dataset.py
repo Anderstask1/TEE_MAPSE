@@ -28,12 +28,13 @@ class UltrasoundData(Dataset):
 
         sequences = []
         for file in files:
-            file_path = os.path.join(self.root_dir, file)
-            raw_file = h5py.File(file_path, 'r')
-            frames = np.array(raw_file['images'])
+            if ".h5" in file:
+                file_path = os.path.join(self.root_dir, file)
+                raw_file = h5py.File(file_path, 'r')
+                frames = np.array(raw_file['images'])
 
-            for i in range(frames.shape[0]):
-                sequences.append("{}_{:0>3d}".format(file, i))
+                for i in range(frames.shape[0]):
+                    sequences.append("{}_{:0>3d}".format(file, i))
 
         self.sequences = sequences
 
@@ -176,10 +177,6 @@ class RandomRotation(object):
 
 
 class ToTensor(object):
-
-    def __init__(self, sigma):
-        self.sigma = sigma
-
     def __call__(self, sample):
         image, cardiac_view = sample['image'], sample['cardiac_view']
 

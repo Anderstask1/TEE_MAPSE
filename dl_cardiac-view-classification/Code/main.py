@@ -8,34 +8,46 @@ from Models import models
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-batch_size = 16
-sigma = 3
+batch_size = 32
 
 print()
 print(" + Batch size:\t\t{}".format(batch_size))
-print(" + Sigma:\t\t{}".format(sigma))
 print()
 
 data_transforms = {
     'train':transforms.Compose([dataset.Rescale((280, 280)),
                         dataset.RandomRotation(10),
                         dataset.RandomCrop(256),
-                        dataset.ToTensor(sigma)]),
+                        dataset.ToTensor()]),
     'val':transforms.Compose([dataset.Rescale(280),
                         dataset.Crop(256),
-                        dataset.ToTensor(sigma)])}
+                        dataset.ToTensor()])}
+
+# datasets = {
+#     'train':dataset.UltrasoundData("/train/", transform=data_transforms['train']),
+#     'val':dataset.UltrasoundData("/val/", transform=data_transforms['val'])}
 
 datasets = {
-    'train':dataset.UltrasoundData("/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train/", transform=data_transforms['train']),
-    'val':dataset.UltrasoundData("/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val/", transform=data_transforms['val'])}
+    'train':dataset.UltrasoundData("/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train", transform=data_transforms['train']), #Trym_data_annotated
+    'val':dataset.UltrasoundData("/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val", transform=data_transforms['val'])}
 
 dataloaders = {
     'train':DataLoader(datasets['train'], batch_size=batch_size, shuffle=True, num_workers=4),
     'val':DataLoader(datasets['val'], batch_size=1, shuffle=False, num_workers=4)}
 
+torch.cuda.empty_cache()
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-model = models.CNN()
+if torch.cuda.is_available():
+    print("Using cuda for gpu-accelerated computations")
+else:
+    print("Using cpu for computations")
+
+#model = models.CNN()
+#model = models.VGG16()
+model = models.ResNext()
+
 model = model.to(device)
 
 optimizer = optim.Adam(model.parameters())

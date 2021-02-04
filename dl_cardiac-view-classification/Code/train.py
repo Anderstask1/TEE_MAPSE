@@ -58,6 +58,7 @@ def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25):
                                 running_loss / 2000, epoch + 1))
 
                         print("Loss: {:.3f}".format(running_loss / 2000))
+                        running_loss = 0.0
 
             epoch_loss = running_loss / len(dataloaders[phase].dataset)
 

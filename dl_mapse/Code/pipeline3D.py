@@ -213,7 +213,8 @@ def main():
         for rotated_field in raw_file[field_name]:
 
             print(rotated_field)
-
+            if usePal == True:
+                sequence = pal[sequence.astype(int)]
             # new image data format
             sequence = np.array(raw_file[field_name][rotated_field]['images'])
 

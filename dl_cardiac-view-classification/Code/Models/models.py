@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from torchvision import models
+
 class Inception1(nn.Module):
     """ Custom layer with parallel convolution blocks """
 
@@ -82,7 +84,7 @@ class Inception2(nn.Module):
         return torch.cat([x_1x1, x_3x3], dim=1)
 
 class CNN(nn.Module):
-    """ Neural Network classifying cardiac US views """
+    """ Neural Network classifying cardiac US views based on architecture designed by ISB """
 
     def __init__(self):
         super(CNN, self).__init__()
@@ -150,3 +152,36 @@ class CNN(nn.Module):
         x = self.pool6(x)
         x = self.softm(x)
         return x.view(x.size(0), -1)
+
+
+class VGG16(nn.Module):
+    """ Neural Network classifying cardiac US views based on VGG16 architecture"""
+
+    def __init__(self):
+        super(VGG16, self).__init__()
+        self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
+
+        vgg16 = models.vgg16_bn(pretrained=True, progress=False) # import vgg16 model
+        num_features = vgg16.classifier[6].in_features
+        features = list(vgg16.classifier.children())[:-1]  # Remove last layer
+        features.extend([nn.Linear(num_features, 4)])  # Add our layer with 4 outputs
+        vgg16.classifier = nn.Sequential(*features) # Add modified classifier to model
+        self.vgg = vgg16
+
+    def forward(self, x):
+        x = self.conv(x)
+        return self.vgg(x)
+
+class ResNext(nn.Module):
+
+    def __init__(self):
+        super(ResNext, self).__init__()
+        self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
+
+        model = models.resnext101_32x8d(pretrained=True, progress=False)
+        model.fc = nn.Linear(model.fc.in_features, 4) # Add our layer with 4 outputs
+        self.resnext = model
+
+    def forward(self, x):
+        x = self.conv(x)
+        return self.resnext(x)
