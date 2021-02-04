@@ -1,5 +1,5 @@
 %Annotation of class for all files in given folder by US rotation angle
-%Started 31.08.2020
+%Started 28.01.2021
 %Author: Anders Tasken
 
 %create folder for transformation matrices

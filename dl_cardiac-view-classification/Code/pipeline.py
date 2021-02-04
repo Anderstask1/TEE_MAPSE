@@ -4,10 +4,11 @@ import numpy as np
 import torch
 
 from Models import models
+from preProcessor import PreProcessor
 
 def main():
 
-    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData"
+    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData"
 
     #model weights from different training data - from floydhub
     model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN/best_weights.pth"
@@ -38,6 +39,9 @@ def main():
     model.eval()
     torch.set_grad_enabled(False)
 
+    # initialize the pipeline
+    preprocess = PreProcessor()
+
     #iterate through .h5 files in dir
     for i, file in enumerate(processFiles):
         print("File {}/{}".format(i+1, len(processFiles)))
@@ -54,12 +58,16 @@ def main():
 
         # new image data format
         frame = 1
-        sequence = np.array(raw_file['images'])
+        sequence = np.array(raw_file['tissue']['data'])
+        sequence = sequence.transpose(2,0,1)
+        sequence, scale_correction, width = preprocess(sequence)
         model_input = sequence[frame, :, :]
-        model_input = model_input.unsqueeze(0).unsqueeze(0).unsqueeze(0)
+        model_input = model_input.unsqueeze(0).unsqueeze(0)
 
         #run the pipeline
-        model_output = torch.sigmoid(model(model_input))
+        model_output = model(model_input)
+        model_output = model_output[0,:].numpy()
+        image_view_class = max(range(len(model_output)), key=model_output.__getitem__) # get index of max element
 
         #write out the detected landmarks and their movement
 
@@ -67,9 +75,9 @@ def main():
         h5_keys = raw_file.keys()
 
         #update the MAPSE related fields
-        if 'Detected_cardiac_view' in h5_keys:
-            del raw_file['Detected_cardiac_view']
-        raw_file.create_dataset('Detected_cardiac_view', data=model_output)
+        if 'detected_cardiac_view' in h5_keys:
+            del raw_file['detected_cardiac_view']
+        raw_file.create_dataset('detected_cardiac_view', data=image_view_class)
 
         raw_file.close()
 
