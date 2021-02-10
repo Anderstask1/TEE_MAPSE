@@ -126,7 +126,6 @@ class CNN(nn.Module):
         self.conv6 = nn.Conv2d(2048, 4, kernel_size=1, padding=1, stride=1)
         self.relu = nn.PReLU()
         self.pool6 = nn.AvgPool2d(10)
-        self.softm = nn.Softmax2d()
 
 
 
@@ -150,7 +149,6 @@ class CNN(nn.Module):
         x = self.conv6(x)
         x = self.relu(x)
         x = self.pool6(x)
-        x = self.softm(x)
         return x.view(x.size(0), -1)
 
 
@@ -178,9 +176,21 @@ class ResNext(nn.Module):
         super(ResNext, self).__init__()
         self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
 
-        model = models.resnext101_32x8d(pretrained=True, progress=False)
-        model.fc = nn.Linear(model.fc.in_features, 4) # Add our layer with 4 outputs
-        self.resnext = model
+        resnext = models.resnext50_32x4d(pretrained=True, progress=False)
+        #resnext = models.resnext101_32x8d(pretrained=True, progress=False)
+
+        # Freeze training for layers
+        for param in resnext.layer1.parameters():
+            param.require_grad = False
+        for param in resnext.layer2.parameters():
+            param.require_grad = False
+        for param in resnext.layer3.parameters():
+            param.require_grad = False
+        for param in resnext.layer4.parameters():
+            param.require_grad = False
+
+        resnext.fc = nn.Linear(resnext.fc.in_features, 4) # Add our layer with 4 outputs
+        self.resnext = resnext
 
     def forward(self, x):
         x = self.conv(x)

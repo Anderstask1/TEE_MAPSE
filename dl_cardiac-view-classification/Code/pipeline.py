@@ -2,32 +2,35 @@ import os
 import h5py
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 from Models import models
 from preProcessor import PreProcessor
 
 def main():
 
-    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData"
-
-    #model weights from different training data - from floydhub
-    model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN/best_weights.pth"
-
-    #get the .h5 files in the directory
-    processFiles = []
-    for root, dirs, files in os.walk(file_dir):
-        for file in files:
-            if file.lower().endswith('.h5'):
-                    processFiles.append(file)
-        break
-    processFiles.sort()
-    print(processFiles)
+    model_name = 'VGG16' # 'CNN' - 'VGG16' - 'ResNext'
 
     # Use cpu as processing unit
     device = torch.device("cpu")
 
-    #load the model
-    model = models.CNN()
+    # folder path to US data
+    # model weights from different training data - from floydhub
+    # load the model
+    if model_name == 'CNN':
+        file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/CNN"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN/best_weights.pth"
+        model = models.CNN()
+    elif model_name == 'VGG16':
+        file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/VGG16"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
+        model = models.VGG16()
+    elif model_name == 'ResNext':
+        file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/ResNext"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext/best_weights.pth"
+        model = models.ResNext()
+    else:
+        print('Please set correct model name.')
 
     # Load model parameters from state dictionary
     model.load_state_dict(torch.load(model_path, map_location='cpu')['model_state_dict'])
@@ -41,6 +44,16 @@ def main():
 
     # initialize the pipeline
     preprocess = PreProcessor()
+
+    # get the .h5 files in the directory
+    processFiles = []
+    for root, dirs, files in os.walk(file_dir):
+        for file in files:
+            if file.lower().endswith('.h5'):
+                processFiles.append(file)
+        break
+    processFiles.sort()
+    print(processFiles)
 
     #iterate through .h5 files in dir
     for i, file in enumerate(processFiles):
@@ -58,7 +71,8 @@ def main():
 
         # new image data format
         frame = 1
-        sequence = np.array(raw_file['tissue']['data'])
+        #sequence = np.array(raw_file['tissue']['data'])
+        sequence = np.array(raw_file['images'])
         sequence = sequence.transpose(2,0,1)
         sequence, scale_correction, width = preprocess(sequence)
         model_input = sequence[frame, :, :]
@@ -66,7 +80,10 @@ def main():
 
         #run the pipeline
         model_output = model(model_input)
+        model_output = F.softmax(model_output, dim=1)
         model_output = model_output[0,:].numpy()
+
+        #find class of highest probability
         image_view_class = max(range(len(model_output)), key=model_output.__getitem__) # get index of max element
 
         #write out the detected landmarks and their movement
@@ -78,6 +95,10 @@ def main():
         if 'detected_cardiac_view' in h5_keys:
             del raw_file['detected_cardiac_view']
         raw_file.create_dataset('detected_cardiac_view', data=image_view_class)
+
+        if 'cardiac_view_probabilities' in h5_keys:
+            del raw_file['cardiac_view_probabilities']
+        raw_file.create_dataset('cardiac_view_probabilities', data=model_output)
 
         raw_file.close()
 

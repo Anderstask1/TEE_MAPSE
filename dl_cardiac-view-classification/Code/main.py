@@ -3,16 +3,41 @@ import torch.nn as nn
 import torch.optim as optim
 import train
 import dataset
+import sys
 
 from Models import models
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
 batch_size = 32
+num_epochs = 25
 
 print()
-print(" + Batch size:\t\t{}".format(batch_size))
+print(" + Batch size:\t\t\t{}".format(batch_size))
+print(" + Number of epochs:\t\t{}".format(num_epochs))
 print()
+
+if len(sys.argv) > 1:
+    user_input = str(sys.argv[1])
+    if user_input == "running_locally":
+        running_locally = True
+        print("Running the code locally")
+    else:
+        running_locally = False
+        print("Running the code remote")
+
+if len(sys.argv) > 2:
+    user_input = str(sys.argv[2])
+
+if running_locally:
+    dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
+    dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
+else:
+    dataset_train_path = "/train/"
+    dataset_val_path = "/val/"
+
+print("Dataset training path: ", dataset_train_path)
+print("Dataset validation path: ", dataset_val_path)
 
 data_transforms = {
     'train':transforms.Compose([dataset.Rescale((280, 280)),
@@ -23,19 +48,13 @@ data_transforms = {
                         dataset.Crop(256),
                         dataset.ToTensor()])}
 
-# datasets = {
-#     'train':dataset.UltrasoundData("/train/", transform=data_transforms['train']),
-#     'val':dataset.UltrasoundData("/val/", transform=data_transforms['val'])}
-
 datasets = {
-    'train':dataset.UltrasoundData("/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train", transform=data_transforms['train']), #Trym_data_annotated
-    'val':dataset.UltrasoundData("/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val", transform=data_transforms['val'])}
+    'train':dataset.UltrasoundData(dataset_train_path, transform=data_transforms['train']),
+    'val':dataset.UltrasoundData(dataset_val_path, transform=data_transforms['val'])}
 
 dataloaders = {
     'train':DataLoader(datasets['train'], batch_size=batch_size, shuffle=True, num_workers=4),
     'val':DataLoader(datasets['val'], batch_size=1, shuffle=False, num_workers=4)}
-
-torch.cuda.empty_cache()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -44,9 +63,18 @@ if torch.cuda.is_available():
 else:
     print("Using cpu for computations")
 
-#model = models.CNN()
-#model = models.VGG16()
-model = models.ResNext()
+if user_input == "CNN":
+    model = models.CNN()
+    print("Model architecture: CNN")
+elif user_input == "VGG16":
+    model = models.VGG16()
+    print("Model architecture: VGG16")
+elif user_input == "ResNext":
+    model = models.ResNext()
+    print("Model architecture: ResNext")
+else:
+    print("User input don't match a model name. Please input another network architecture name.")
+    sys.exit()
 
 model = model.to(device)
 
@@ -54,4 +82,6 @@ optimizer = optim.Adam(model.parameters())
 
 loss = nn.L1Loss()
 
-train.train_model(model, device, dataloaders, loss, optimizer)
+print("Train model...")
+
+train.train_model(model, device, dataloaders, loss, optimizer, num_epochs, running_locally)

@@ -5,7 +5,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25):
+def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25, running_locally=True):
+    if running_locally:
+        training_info_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/training_info.pth"
+        weights_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
+    else:
+        training_info_path = "/output/training_info.pth"
+        weights_path = "/output/best_weights.pth"
+
+    print("Training info path: ", training_info_path)
+    print("Weights path: ", weights_path)
+
     criterion = nn.CrossEntropyLoss()
 
     train_info = {'epoch': [], 'loss': [], 'all_loss': []}
@@ -36,8 +46,7 @@ def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25):
                 with torch.set_grad_enabled(phase == 'train'):
 
                     out = model(sample_batch['image'])
-                    #target = [int(a) for a in sample_batch['cardiac_view']]
-                    target = torch.cuda.LongTensor(sample_batch['cardiac_view'].long().cuda())
+                    target = torch.LongTensor(sample_batch['cardiac_view'].long()).to(device)
                     loss = criterion(out, target)
 
                     all_loss = loss.item()
@@ -72,15 +81,13 @@ def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25):
             torch.save({
                 'epoch': epoch,
                 'train_info': train_info,
-                'val_info':val_info}, "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data/training_info.pth")
-                #'val_info': val_info}, "/output/training_info.pth")
+                'val_info': val_info}, training_info_path)
             if phase == 'val' and epoch_loss <= best_loss:
                 torch.save({
                     'epoch': epoch,
                     'model_state_dict': model.state_dict(),
                     # Edit this path
-                    'optimizer_state_dict':optimizer.state_dict()}, "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data/best_weights.pth")
-                    #'optimizer_state_dict': optimizer.state_dict()}, "/output/best_weights.pth")
+                    'optimizer_state_dict': optimizer.state_dict()}, weights_path)
                 best_loss = epoch_loss
                 print("Weights saved")
     print()
