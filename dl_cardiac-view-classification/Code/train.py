@@ -56,6 +56,8 @@ def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25, runn
                         loss.backward()
                         optimizer.step()
                         train_info['all_loss'].append(all_loss)
+                        print('{{"metric": "loss", "value": {}, "epoch": {}}}'.format(
+                            running_loss / (i + 1), epoch + 1))
 
                     if i % 2000 == 1999:
 
