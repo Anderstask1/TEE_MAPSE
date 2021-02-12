@@ -6,6 +6,8 @@ import argparse
 import sys
 import re
 
+from itertools import cycle
+
 # natural sorting of list
 def atoi(text):
     return int(text) if text.isdigit() else text
@@ -21,6 +23,9 @@ args = parser.parse_args()
 
 #or hard coded
 root_dir = "/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data"
+
+# Frame in sequence to visualize and evaluate
+frame = 0
 
 # User input file path (in order to mach matlab script from command line)
 if len(sys.argv) > 1:
@@ -60,39 +65,42 @@ for i, file in enumerate(processFiles):
     rotated_fields.sort(key=natural_keys)
 
     # iterate through all rotations
-    for counter, rotated_field in enumerate(rotated_fields):
+    for rotated_field in cycle(rotated_fields):
 
         tissue = np.array(f_read_write['MVCenterRotatedVolumes'][rotated_field]['images'])
 
         imgs = np.empty(shape=(0,tissue.shape[1],tissue.shape[2]))
 
         print(rotated_field)
-        print('File: ', counter, '/', len(f_read_write['MVCenterRotatedVolumes']))
+        print("\n")
 
-        for i in range(tissue.shape[0]):
-            plt.imshow(np.transpose(tissue[i,:,:]), cmap='gray')
-            plt.pause(0.01)
+        plt.imshow(np.transpose(tissue[frame,:,:]), cmap='gray')
+
+        user_input = plt.waitforbuttonpress(timeout= 10)
+
+        if user_input:
+            class_idx = input(
+                "Please enter a class index for the view (same for all frames in sequence):\n" \
+                +"4C = 0, 2C = 1, ALAX = 2\n" \
+                +"Enter c if you wish to exit\n")
             plt.clf()
 
-        plt.imshow(np.transpose(tissue[0,:,:]), cmap='gray')
-
-        class_idx = input("\nPlease enter a class index for the view (same for all frames in sequence):\n 4C = 0, 2C = 1, ALAX = 2, Other = 3\n\n")
-
-        if class_idx == "0":
-            print("View marked ass 4C - Four Chamber\n")
-        elif class_idx == "1":
-            print("View marked ass 2C - Two Chamber\n")
-        elif class_idx == "2":
-            print("View marked ass ALAX - Apical Long Axis\n")
-        elif class_idx == "3":
-            print("View marked ass Other - Neither of the respective classes\n")
+            if class_idx == "0":
+                print("View marked ass 4C - Four Chamber\n")
+            elif class_idx == "1":
+                print("View marked ass 2C - Two Chamber\n")
+            elif class_idx == "2":
+                print("View marked ass ALAX - Apical Long Axis\n")
+            elif class_idx == "":
+                print("View skipped\n")
+            elif class_idx == "c":
+                print("Saving and closing file\n")
+                break
+            else:
+                print("Marked class not valid, please redo annotation of this view\n")
         else:
-            print("Marked class not valid, please redo annotation of this view\n")
-
-        fig = plt.gcf()
-        fig.set_size_inches(10,10)
-
-        plt.clf()
+            plt.clf()
+            continue
 
         # get the hdf ke
         h5_keys = f_read_write['Annotations'].keys()

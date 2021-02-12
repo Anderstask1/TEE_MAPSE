@@ -9,7 +9,7 @@ from preProcessor import PreProcessor
 
 def main():
 
-    model_name = 'CNN' # 'CNN' - 'VGG16' - 'ResNext'
+    model_name = 'ResNext' # 'CNN' - 'VGG16' - 'ResNext'
 
     # Use cpu as processing unit
     device = torch.device("cpu")
@@ -77,37 +77,24 @@ def main():
         #sequence = sequence.transpose(2,0,1)
         sequence, scale_correction, width = preprocess(sequence)
 
-        class_array = []
-        model_output_array = []
+        frame = 0
 
-        for frame in range(sequence.shape[0]):
-        #for frame in range(0):
-            model_input = sequence[frame, :, :]
-            model_input = model_input.unsqueeze(0).unsqueeze(0)
+        model_input = sequence[frame, :, :]
+        model_input = model_input.unsqueeze(0).unsqueeze(0)
 
-            #run the pipeline
-            model_output = model(model_input)
-            model_output = F.softmax(model_output, dim=1)
-            model_output = model_output[0,:].numpy()
-
-            model_output_array.append(model_output)
-
-            #find class of highest probability
-            class_array.append(max(range(len(model_output)), key=model_output.__getitem__)) # get index of max element
+        #run the pipeline
+        model_output = model(model_input)
+        model_output = F.softmax(model_output, dim=1)
+        model_output = model_output[0,:].numpy()
 
         #write out the detected landmarks and their movement
 
         #get the hdf keys
         h5_keys = raw_file.keys()
 
-        #update the MAPSE related fields
-        if 'detected_cardiac_view' in h5_keys:
-            del raw_file['detected_cardiac_view']
-        raw_file.create_dataset('detected_cardiac_view', data=class_array)
-
         if 'cardiac_view_probabilities' in h5_keys:
             del raw_file['cardiac_view_probabilities']
-        raw_file.create_dataset('cardiac_view_probabilities', data=model_output_array)
+        raw_file.create_dataset('cardiac_view_probabilities', data=model_output)
 
         raw_file.close()
 
