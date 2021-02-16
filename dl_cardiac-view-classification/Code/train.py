@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25, training_info_path: str, weights_path: str):
+def train_model(model, device, dataloaders, loss, optimizer, training_info_path: str, weights_path: str, num_epochs=25):
 
     print("Training info path: ", training_info_path)
     print("Weights path: ", weights_path)

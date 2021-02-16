@@ -89,4 +89,4 @@ loss = nn.L1Loss()
 
 print("Train model...")
 
-train.train_model(model, device, dataloaders, loss, optimizer, num_epochs, training_info_path, weights_path)
+train.train_model(model, device, dataloaders, loss, optimizer, training_info_path, weights_path, num_epochs)
