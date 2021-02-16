@@ -69,9 +69,6 @@ def main():
         # sequence = np.array(raw_file['tissue']['data'])
         # sequence = np.transpose(sequence, (2,1,0))
 
-        # new image data format
-        frame = 1
-
         #sequence = np.array(raw_file['tissue']['data'])
         sequence = np.array(raw_file['images'])
         #sequence = sequence.transpose(2,0,1)

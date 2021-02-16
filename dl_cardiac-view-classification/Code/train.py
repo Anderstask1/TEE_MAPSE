@@ -5,13 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25, running_locally=True):
-    if running_locally:
-        training_info_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/training_info.pth"
-        weights_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
-    else:
-        training_info_path = "/output/training_info.pth"
-        weights_path = "/output/best_weights.pth"
+def train_model(model, device, dataloaders, loss, optimizer, num_epochs=25, training_info_path: str, weights_path: str):
 
     print("Training info path: ", training_info_path)
     print("Weights path: ", weights_path)

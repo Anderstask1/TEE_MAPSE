@@ -20,21 +20,26 @@ print()
 if len(sys.argv) > 1:
     user_input = str(sys.argv[1])
     if user_input == "running_locally":
-        running_locally = True
+        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
+        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
+        training_info_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/training_info.pth"
+        weights_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
         print("Running the code locally")
+    elif user_input == "running_ssh":
+        dataset_train_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/train"
+        dataset_val_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/val"
+        training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/training_info.pth"
+        weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
+        print("Running the code remotely with ssh")
     else:
-        running_locally = False
+        dataset_train_path = "/train/"
+        dataset_val_path = "/val/"
+        training_info_path = "/output/training_info.pth"
+        weights_path = "/output/best_weights.pth"
         print("Running the code remote")
 
 if len(sys.argv) > 2:
     user_input = str(sys.argv[2])
-
-if running_locally:
-    dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
-    dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
-else:
-    dataset_train_path = "/train/"
-    dataset_val_path = "/val/"
 
 print("Dataset training path: ", dataset_train_path)
 print("Dataset validation path: ", dataset_val_path)
@@ -84,4 +89,4 @@ loss = nn.L1Loss()
 
 print("Train model...")
 
-train.train_model(model, device, dataloaders, loss, optimizer, num_epochs, running_locally)
+train.train_model(model, device, dataloaders, loss, optimizer, num_epochs, training_info_path, weights_path)
