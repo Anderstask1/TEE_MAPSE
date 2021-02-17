@@ -19,18 +19,17 @@ def main():
     device = torch.device("cpu")
 
     # folder path to US data
+    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData"
+
     # model weights from different training data - from floydhub
     # load the model
     if model_name == 'CNN':
-        file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/CNN"
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN/best_weights.pth"
         model = models.CNN()
     elif model_name == 'VGG16':
-        file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/VGG16"
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
         model = models.VGG16()
     elif model_name == 'ResNext':
-        file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/ResNext"
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext/best_weights.pth"
         model = models.ResNext()
     else:
@@ -67,35 +66,34 @@ def main():
         print(file)
         raw_file = h5py.File(file_path, 'r+')
 
-        #read the tissue images and transpose the coordinates
+        # get the hdf keys for rotated volumes
+        h5_keys = raw_file['MVCenterRotatedVolumes'].keys()
 
-        # old image data formate
-        # sequence = np.array(raw_file['tissue']['data'])
-        # sequence = np.transpose(sequence, (2,1,0))
+        for fn in h5_keys:
+            print('Classifying cardiac view on image: ', fn)
 
-        #sequence = np.array(raw_file['tissue']['data'])
-        sequence = np.array(raw_file['images'])
-        #sequence = sequence.transpose(2,0,1)
-        sequence, scale_correction, width = preprocess(sequence)
+            sequence = np.array(raw_file['MVCenterRotatedVolumes'][fn]['images'])
+            #sequence = sequence.transpose(2,0,1)
+            sequence, scale_correction, width = preprocess(sequence)
 
-        frame = 0
+            frame = 0
 
-        model_input = sequence[frame, :, :]
-        model_input = model_input.unsqueeze(0).unsqueeze(0)
+            model_input = sequence[frame, :, :]
+            model_input = model_input.unsqueeze(0).unsqueeze(0)
 
-        #run the pipeline
-        model_output = model(model_input)
-        model_output = F.softmax(model_output, dim=1)
-        model_output = model_output[0,:].numpy()
+            #run the pipeline
+            model_output = model(model_input)
+            model_output = F.softmax(model_output, dim=1)
+            model_output = model_output[0,:].numpy()
 
-        #write out the detected landmarks and their movement
+            #write out the detected landmarks and their movement
 
-        #get the hdf keys
-        h5_keys = raw_file.keys()
+            #get the hdf keys
+            h5_keys = raw_file['MVCenterRotatedVolumes'][fn].keys()
 
-        if 'cardiac_view_probabilities' in h5_keys:
-            del raw_file['cardiac_view_probabilities']
-        raw_file.create_dataset('cardiac_view_probabilities', data=model_output)
+            if 'cardiac_view_probabilities' in h5_keys:
+                del raw_file['MVCenterRotatedVolumes'][fn]['cardiac_view_probabilities']
+            raw_file['MVCenterRotatedVolumes'][fn].create_dataset('cardiac_view_probabilities', data=model_output)
 
         raw_file.close()
 
