@@ -76,6 +76,12 @@ function RotateVolumeYAxis3D(fileNames, startAngle, endAngle, stepDegree)
             %allocate
             imageData = data.CartesianVolumes.('vol01');
             slices = zeros(size(imageData, 1), size(imageData, 3), 3); %reduce computational cost by only reviewing 3 images, not frameNo
+            
+            %make sure there is enough recorded volumes
+            if size(fieldnames(data.CartesianVolumes),1) < 3
+                fprintf('Skipping %s due to missing recordings (below 3).\n', inputName)
+                continue
+            end
 
             for frame = 1:3%frameNo
                 %get the 3D frame

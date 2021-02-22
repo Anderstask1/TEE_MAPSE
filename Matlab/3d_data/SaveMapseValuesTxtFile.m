@@ -1,8 +1,8 @@
 %Save computed MAPSE values, and landmark errors, as text file
 %Author: Anders Tasken
-function SaveMapseValuesTxtFile(filesPath)
+function SaveMapseValuesTxtFile(filesPath, cardiac_view)
 
-    variablesFilename = strcat(filesPath, 'LandmarkMatricesVariables/MapseAndErrorMaps');
+    variablesFilename = strcat(filesPath, 'LandmarkMatricesVariables/MapseAndErrorMaps_', cardiac_view);
     load(variablesFilename,...
         'mapse_raw_left_map', 'mapse_raw_right_map', 'mapse_bezier_left_map', 'mapse_bezier_right_map',...
         'mapse_annotated_left_map', 'mapse_annotated_right_map', 'mapse_rejected_left_map', 'mapse_rejected_right_map', 'mapse_mean_rejected_map', ...
@@ -18,12 +18,13 @@ function SaveMapseValuesTxtFile(filesPath)
         'mapse_mean_reference_map', 'mapse_mean_sd_reference_map');
 
     %Save results as txt file table
-    resultsName = strcat(filesPath, 'MAPSE-values', '.txt');
+    resultsName = strcat(filesPath, 'MAPSE-values_', cardiac_view, '.txt');
     fileID = fopen(resultsName,'w');
     
     
     
     fprintf(fileID,'\n\n\n%s\n', '----------------- MAPSE Error -----------------');
+    fprintf(fileID,'\n%s%s%s\n', ' ----------------- ', cardiac_view, ' ----------------- ');
     fprintf(fileID,'%s\n\n', 'Mean difference +- standard deviation');
     
     fprintf(fileID,'%s\n', 'Mean reference - Raw left and right:');
@@ -58,9 +59,11 @@ function SaveMapseValuesTxtFile(filesPath)
     
     fprintf(fileID,'\n\n\n%s\n\n', 'MAPSE difference for each file');
     for k = keys(mapse_raw_left_map)
-        mapseReference = mapse_mean_reference_map(k{1})*1000;
-        mapseEstimate = mapse_raw_left_map(k{1})*1000;
-        fprintf(fileID,'\n%s %s %.4f\n', k{1}, 'MAPSE difference:', abs(mapseReference - mapseEstimate));
+        if isKey(mapse_mean_reference_map, k)
+            mapseReference = mapse_mean_reference_map(k{1})*1000;
+            mapseEstimate = mapse_raw_left_map(k{1})*1000;
+            fprintf(fileID,'\n%s %s %.4f\n', k{1}, 'MAPSE difference:', abs(mapseReference - mapseEstimate));
+        end        
     end
     
     

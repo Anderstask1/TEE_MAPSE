@@ -136,7 +136,7 @@ function InverseTransformationLandmarks3D(fileNames, fromAngle, toAngle)
             mkdir(directoryPath);
         end
         
-        variablesFilename = strcat(directoryPath, 'landmarkMatrices_', name);
+        variablesFilename = strcat(directoryPath, 'landmarkMatrices_all-views_', name);
         save(variablesFilename,...
             'landmarkLeft3DMatrix', 'landmarkRight3DMatrix', 'annotatedLeft3DMatrix', 'annotatedRight3DMatrix');
         

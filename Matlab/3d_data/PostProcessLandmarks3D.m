@@ -2,7 +2,8 @@
 %Author: Anders Tasken
 %Started 18.09.2020
 
-function PostProcessLandmarks3D(fileNames)
+function PostProcessLandmarks3D(fileNames, cardiac_view)
+
     %call the MAPSE postprocessing script for each file
     for f=1:size(fileNames,2)
         %root name from h5 file
@@ -41,7 +42,9 @@ function PostProcessLandmarks3D(fileNames)
         
         %% Load landmark variables
         directoryPath = strcat(path, 'LandmarkMatricesVariables/');
-        variablesFilename = strcat(directoryPath, 'landmarkMatrices_', name);
+        
+        variablesFilename = strcat(directoryPath, 'landmarkMatrices_', cardiac_view, '_', name);
+        
         load(variablesFilename,...
             'landmarkLeft3DMatrix', 'landmarkRight3DMatrix', 'annotatedLeft3DMatrix', 'annotatedRight3DMatrix');
         
@@ -62,13 +65,13 @@ function PostProcessLandmarks3D(fileNames)
         [meanSplineCurve, meanBezierCurve] = InterpolateLandmarks3D(landmarkMean3DMatrix, frameNo); 
         
         %% Save workspace variables        
-        variablesFilename = strcat(path, 'LandmarkMatricesVariables/landmarkMatrices_', name);
+        variablesFilename = strcat(path, 'LandmarkMatricesVariables/landmarkMatrices_', cardiac_view, '_', name);
         save(variablesFilename,...
             'leftLandmarkSplineCurve', 'rightLandmarkSplineCurve', 'annotatedLeftSplineCurve', 'annotatedRightSplineCurve',...
             'leftLandmarkBezierCurve', 'rightLandmarkBezierCurve', 'annotatedLeftBezierCurve', 'annotatedRightBezierCurve',...
             'landmarkLeft3DMatrix', 'landmarkRight3DMatrix', 'annotatedLeft3DMatrix', 'annotatedRight3DMatrix',...
             'rejectedLandmarkLeft3DMatrix', 'rejectedLandmarkRight3DMatrix', ...
-            'landmarkMean3DMatrix', 'meanSplineCurve', 'meanBezierCurve','-append'), ;
+            'landmarkMean3DMatrix', 'meanSplineCurve', 'meanBezierCurve','-append');
         
     end
 end

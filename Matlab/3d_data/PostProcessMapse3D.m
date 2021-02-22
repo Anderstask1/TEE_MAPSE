@@ -2,7 +2,7 @@
 %Author: Anders Tasken
 %Started 18.09.2020
 
-function PostProcessMapse3D(fileNames)
+function PostProcessMapse3D(fileNames, cardiac_view)
 
     %save mapse values in map
     mapse_raw_left_map = containers.Map('KeyType', 'char', 'ValueType', 'double');
@@ -69,7 +69,7 @@ function PostProcessMapse3D(fileNames)
         end
 
         %% Load landmark variables
-        variablesFilename = strcat(path, 'LandmarkMatricesVariables/landmarkMatrices_', name);
+        variablesFilename = strcat(path, 'LandmarkMatricesVariables/landmarkMatrices_', cardiac_view, '_', name);
         load(variablesFilename,...
             'leftLandmarkSplineCurve', 'rightLandmarkSplineCurve', 'annotatedLeftSplineCurve', 'annotatedRightSplineCurve',...
             'leftLandmarkBezierCurve', 'rightLandmarkBezierCurve', 'annotatedLeftBezierCurve', 'annotatedRightBezierCurve',...
@@ -170,7 +170,7 @@ function PostProcessMapse3D(fileNames)
     end
     
     %% Save workspace variables
-    variablesFilename = strcat(path, 'LandmarkMatricesVariables/MapseAndErrorMaps');
+    variablesFilename = strcat(path, 'LandmarkMatricesVariables/MapseAndErrorMaps_', cardiac_view);
     save(variablesFilename,...
         'mapse_raw_left_map', 'mapse_raw_right_map', 'mapse_bezier_left_map', 'mapse_bezier_right_map',...
         'mapse_annotated_left_map', 'mapse_annotated_right_map', 'mapse_rejected_left_map', 'mapse_rejected_right_map', 'mapse_mean_rejected_map', ...

@@ -236,9 +236,5 @@ for i = 1 : length(filePaths)
     % _spline_interpolation-plot3D_left_all-frames
     % _frame_1_mean_scatter_spline_bezier_3D_with_slices
     MitralAnnulus3DPlot(fileNames, {'_frame_1_lineplot3D_with_slices'});
-    
-    %% Compute area of mitral valve
-    
-    MitralValveAreaComputation(fileNames, 'all-views');
 end
 
