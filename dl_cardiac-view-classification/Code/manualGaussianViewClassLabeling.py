@@ -157,11 +157,12 @@ def main():
         rotated_fields = list(f_read_write['MVCenterRotatedVolumes'].keys())
         rotated_fields.sort(key=natural_keys)
 
-        temp = cycle(rotated_fields)
+        idx = 0
 
         # iterate through all rotations
-        for rotated_field in cycle(rotated_fields):
-
+        #for rotated_field in cycle(rotated_fields):
+        while True:
+            rotated_field = rotated_fields[idx]
             tissue = np.array(f_read_write['MVCenterRotatedVolumes'][rotated_field]['images'])
 
             imgs = np.empty(shape=(0,tissue.shape[1],tissue.shape[2]))
@@ -177,9 +178,9 @@ def main():
 
             while not plt.waitforbuttonpress(100000): pass
 
-            if user_input == "1" or user_input == "2" or user_input == "3":
-                plt.clf()
+            plt.clf()
 
+            if user_input == "1" or user_input == "2" or user_input == "3":
                 # get the hdf key
                 h5_keys = f_read_write['ClassAnnotations'].keys()
 
@@ -200,8 +201,16 @@ def main():
             elif user_input == "c":
                 print("Saving and closing file\n")
                 break
+            elif user_input == "left":
+                if idx == 0:
+                    idx = len(rotated_fields)-1
+                else:
+                    idx -= 1
             else:
-                plt.clf()
+                if idx == len(rotated_fields)-1:
+                    idx = 0
+                else:
+                    idx += 1
                 continue
 
         f_read_write.close()

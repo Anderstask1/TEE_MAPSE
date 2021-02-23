@@ -32,7 +32,14 @@ function SaveSliceImageHdf(fileNames, fieldName)
             mkdir(directoryPath);
         end
         
+        %check if volume is rotated
+        if ~any(strcmp(fieldnames(data),'RotatedVolumes'))
+            fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
+            continue
+        end
+        
         optMapseAngle = -1;
+        
         if strcmp(fieldName, 'MVCenterRotatedVolumes')
             %load optMapseAngles
             filename = strcat(path, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');

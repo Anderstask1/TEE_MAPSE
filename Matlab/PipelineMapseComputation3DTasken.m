@@ -46,10 +46,10 @@ for i = 1 : length(filePaths)
 
     %% Hyperparameters
 
-    %Rotate volume from start-angle to end-angle with degree stepz
+    %Rotate volume from start-angle to end-angle with degree step
     startAngleCenter = 60;
     endAngleCenter = 120;
-    stepDegreeCenter = 2;
+    stepDegreeCenter = 1;
 
     %Rotate volume from start-angle to end-angle with degree step
     startAngleRotate = 0;
