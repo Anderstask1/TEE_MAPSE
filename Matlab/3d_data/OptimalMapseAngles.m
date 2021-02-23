@@ -23,6 +23,12 @@ function OptimalMapseAngles(fileNames, filesPath)
 
         %load data
         hdfdata = HdfImport(inputName);
+        
+        %check if volume is rotated
+        if ~any(strcmp(fieldnames(hdfdata),'RotatedVolumes'))
+            fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
+            continue
+        end
 
         %get all fields from data struct
         fields = fieldnames(hdfdata.RotatedVolumes);

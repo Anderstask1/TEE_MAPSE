@@ -224,7 +224,7 @@ for i = 1 : length(filePaths)
     %% Plot mitral annulus 3D
     disp('Create plots for all files in directory')
 
-    MitralAnnulus3DRendering(fileNames, 'all-views');
+    %MitralAnnulus3DRendering(fileNames, 'all-views');
 
     %% Show plot from all files
     disp('Show selected plots')
@@ -235,10 +235,14 @@ for i = 1 : length(filePaths)
     % _frame_1_spline_interpolation-plot3D_with_slices
     % _spline_interpolation-plot3D_left_all-frames
     % _frame_1_mean_scatter_spline_bezier_3D_with_slices
-    MitralAnnulus3DPlot(fileNames, {'_frame_1_lineplot3D_with_slices'});
+    %MitralAnnulus3DPlot(fileNames, {'_frame_1_spline_interpolation-plot3D_with_slices'});
     
     %% Compute area of mitral valve
     
-    MitralValveAreaComputation(fileNames, 'all-views');
+    %MitralValveAreaComputation(fileNames, 'all-views');
+    
+    %% Compute perimeter of mitral valve
+    
+    %MitralValvePerimeterComputation(fileNames, 'all-views');
 end
 

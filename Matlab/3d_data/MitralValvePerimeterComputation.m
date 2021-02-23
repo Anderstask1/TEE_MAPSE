@@ -1,7 +1,7 @@
-%Compute area of mitral valve from scatterpoints of annulus
+%Compute perimeter of mitral valve from scatterpoints of annulus
 %Author: Anders Tasken
 %Started 19.02.2021
-function MitralValveAreaComputation(fileNames, cardiac_view)
+function MitralValvePerimeterComputation(fileNames, cardiac_view)
 
     %call the MAPSE postprocessing script for each file
     for f=1:size(fileNames,2)
@@ -43,30 +43,23 @@ function MitralValveAreaComputation(fileNames, cardiac_view)
             'landmarkLeft3DMatrix', 'landmarkRight3DMatrix', 'annotatedLeft3DMatrix', 'annotatedRight3DMatrix',...
             'rejectedLandmarkLeft3DMatrix', 'rejectedLandmarkRight3DMatrix', ...
             'landmarkMean3DMatrix', 'meanSplineCurve', 'meanBezierCurve');
-
         
         for frame = 1 : size(landmarkLeft3DMatrix, 3)
-            %landmark3DMatrix = landmarkRight3DMatrix(:,:,frame);
+            
+            %landmark3DMatrix = rejectedLandmarkLeft3DMatrix(:,:,frame);
             landmark3DMatrix = permute(leftLandmarkBezierCurve(:, :, frame), [2 1 3]);
             landmark3DMatrix = landmark3DMatrix(:,~isnan(landmark3DMatrix(1,:)));            
             landmark3DMatrix = landmark3DMatrix .* (pixelCorr); %in millimeters
-
-            %plot surface of valve
-            %p_h=plot3(landmark3DMatrix(1,:),landmark3DMatrix(2,:),landmark3DMatrix(3,:),'o'); hold on
-            tri = delaunay(landmark3DMatrix(1,:),landmark3DMatrix(2,:)); %matlab  of scattered data
-            h = trisurf(tri, landmark3DMatrix(1,:), landmark3DMatrix(2,:), landmark3DMatrix(3,:), ...
-                'FaceColor', 'y', 'FaceAlpha', 0.5); %surf of triangulations
             
-            %area of patch = sum of areas of all patch faces
-            faces = h.Faces;
-            verts = h.Vertices;
-            a = verts(faces(:, 2), :) - verts(faces(:, 1), :);
-            b = verts(faces(:, 3), :) - verts(faces(:, 1), :);
-            c = cross(a, b, 2);
-            area = 1/2 * sum(sqrt(sum(c.^2, 2)));
+            plot3(landmark3DMatrix(1,:), landmark3DMatrix(2,:), landmark3DMatrix(3,:), 'LineWidth', 3);
             
-            fprintf('Area of MV is: %0.2f cm². \n', area*100); % mm² to cm²
-            %
+            dist = 0;
+            
+            for i = 1 : size(landmark3DMatrix, 2)
+                dist = dist + norm(landmark3DMatrix(:,1)-landmark3DMatrix(:,2)); %mm
+            end
+            
+            fprintf('Perimeter of MV is: %0.2f cm. \n', dist*100); 
         end
     end
 end

@@ -32,6 +32,12 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
         boundingBox = imref3d(size(vol1));
         sz =size(vol1);
         
+        %check if volume is rotated
+        if ~any(strcmp(fieldnames(hdfdata),'RotatedVolumes'))
+            fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
+            continue
+        end
+        
         %load optMapseAngles
         filename = strcat(path, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');
         optMapseAngle = load(filename, 'optMapseAngle').optMapseAngle;

@@ -56,15 +56,7 @@ function MitralValveAreaComputation(fileNames, cardiac_view)
             tri = delaunay(landmark3DMatrix(1,:),landmark3DMatrix(2,:)); %matlab  of scattered data
             h = trisurf(tri, landmark3DMatrix(1,:), landmark3DMatrix(2,:), landmark3DMatrix(3,:), ...
                 'FaceColor', 'y', 'FaceAlpha', 0.5); %surf of triangulations
-            
-            %area of patch = sum of areas of all patch faces
-            faces = h.Faces;
-            verts = h.Vertices;
-            a = verts(faces(:, 2), :) - verts(faces(:, 1), :);
-            b = verts(faces(:, 3), :) - verts(faces(:, 1), :);
-            c = cross(a, b, 2);
-            area = 1/2 * sum(sqrt(sum(c.^2, 2)));
-            
+            %area of patch = 
             fprintf('Area of MV is: %0.2f cm². \n', area*100); % mm² to cm²
             %
         end
