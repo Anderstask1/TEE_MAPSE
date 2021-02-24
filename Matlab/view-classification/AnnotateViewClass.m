@@ -70,13 +70,13 @@ for i = 1:numel(folderNames)
 
             switch idx
                 case 1
-                    referenceArray(:) = 0; %4C
+                    referenceArray(:) = 1; %4C
                     s.reference = referenceArray;
                 case 2
-                    referenceArray(:) = 1; %'2C'
+                    referenceArray(:) = 2; %'2C'
                     s.reference = referenceArray;
                 case 3
-                    referenceArray(:) = 2; %'ALAX'
+                    referenceArray(:) = 3; %'ALAX'
                     s.reference = referenceArray;
                 otherwise
                     fprintf('Error - did not find class to file: %s \n', filePath)

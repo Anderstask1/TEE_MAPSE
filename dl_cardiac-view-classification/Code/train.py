@@ -10,7 +10,10 @@ def train_model(model, device, dataloaders, loss, optimizer, training_info_path:
     print("Training info path: ", training_info_path)
     print("Weights path: ", weights_path)
 
+    #Classification
     criterion = nn.CrossEntropyLoss()
+    #Regression
+    criterion = nn.MSELoss()
 
     train_info = {'epoch': [], 'loss': [], 'all_loss': []}
     val_info = {'epoch': [], 'loss': [], 'all_loss': []}
@@ -40,7 +43,7 @@ def train_model(model, device, dataloaders, loss, optimizer, training_info_path:
                 with torch.set_grad_enabled(phase == 'train'):
 
                     out = model(sample_batch['image'])
-                    target = torch.LongTensor(sample_batch['cardiac_view'].long()).to(device)
+                    target = torch.DoubleTensor(sample_batch['cardiac_view']).to(device)
                     loss = criterion(out, target)
 
                     all_loss = loss.item()

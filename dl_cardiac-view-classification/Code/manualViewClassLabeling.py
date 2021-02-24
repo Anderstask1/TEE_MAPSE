@@ -13,100 +13,117 @@ def atoi(text):
 def natural_keys(text):
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
 
-#user input
-plt.ion()
-parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--data-path')
-args = parser.parse_args()
+#user input from matplotlib figure
+user_input = None
+def press(event):
+    global user_input
+    user_input = event.key
 
-#or hard coded
-root_dir = "/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data"
+def main():
+    #user input
+    plt.ion()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--data-path')
+    args = parser.parse_args()
 
-# User input file path (in order to mach matlab script from command line)
-if len(sys.argv) > 1:
-    root_dir = str(sys.argv[2])
+    root_dir = "/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotating"
 
-print('File path is: ', root_dir)
-print(sys.argv)
+    # Frame in sequence to visualize and evaluate
+    frame = 0
 
-#get the .h5 files in the directory
-processFiles = []
-for root, dirs, files in os.walk(root_dir):
-    for file in files:
-        if file.lower().endswith('.h5'):
-                processFiles.append(file)
-    break
-processFiles.sort()
-print(processFiles)
+    # User input file path (in order to mach matlab script from command line)
+    if len(sys.argv) > 1:
+        root_dir = str(sys.argv[2])
 
-#iterate through .h5 files in dir
-for i, file in enumerate(processFiles):
-    print("File {}/{}".format(i+1, len(processFiles)))
-    file_path = os.path.join(root_dir, file)
+    print('File path is: ', root_dir)
+    print(sys.argv)
 
-    print(file)
+    #get the .h5 files in the directory
+    processFiles = []
+    for root, dirs, files in os.walk(root_dir):
+        for file in files:
+            if file.lower().endswith('.h5'):
+                    processFiles.append(file)
+        break
+    processFiles.sort()
+    print(processFiles)
 
-    f_read_write = h5py.File(file_path, 'r+')
+    #iterate through .h5 files in dir
+    for i, file in enumerate(processFiles):
+        print("File {}/{}".format(i+1, len(processFiles)))
+        file_path = os.path.join(root_dir, file)
 
-    # get the hdf keys
-    h5_keys = f_read_write.keys()
+        print(file)
 
-    # create group in hdf5 file for annotations
-    if 'Annotations' in h5_keys:
-        del f_read_write['Annotations']
-    f_read_write.create_group('Annotations')
-
-    rotated_fields = list(f_read_write['MVCenterRotatedVolumes'].keys())
-    rotated_fields.sort(key=natural_keys)
-
-    # iterate through all rotations
-    for counter, rotated_field in enumerate(rotated_fields):
-
-        tissue = np.array(f_read_write['MVCenterRotatedVolumes'][rotated_field]['images'])
-
-        imgs = np.empty(shape=(0,tissue.shape[1],tissue.shape[2]))
-
-        print(rotated_field)
-        print('File: ', counter, '/', len(f_read_write['MVCenterRotatedVolumes']))
-
-        for i in range(tissue.shape[0]):
-            plt.imshow(np.transpose(tissue[i,:,:]), cmap='gray')
-            plt.pause(0.01)
-            plt.clf()
-
-        plt.imshow(np.transpose(tissue[0,:,:]), cmap='gray')
-
-        class_idx = input("\nPlease enter a class index for the view (same for all frames in sequence):\n 4C = 0, 2C = 1, ALAX = 2, Other = 3\n\n")
-
-        if class_idx == "0":
-            print("View marked ass 4C - Four Chamber\n")
-        elif class_idx == "1":
-            print("View marked ass 2C - Two Chamber\n")
-        elif class_idx == "2":
-            print("View marked ass ALAX - Apical Long Axis\n")
-        elif class_idx == "3":
-            print("View marked ass Other - Neither of the respective classes\n")
-        else:
-            print("Marked class not valid, please redo annotation of this view\n")
-
-        fig = plt.gcf()
-        fig.set_size_inches(10,10)
-
-        plt.clf()
-
-        # get the hdf ke
-        h5_keys = f_read_write['Annotations'].keys()
-
-        #create group in hdf5 file for annotations
-        if rotated_field in h5_keys:
-            del f_read_write['Annotations'][rotated_field]
-        f_read_write['Annotations'].create_group(rotated_field)
+        f_read_write = h5py.File(file_path, 'r+')
 
         # get the hdf keys
-        h5_keys = f_read_write['Annotations'][rotated_field].keys()
+        h5_keys = f_read_write.keys()
 
-        if 'reference' in h5_keys:
-            del f_read_write['Annotations'][rotated_field]['reference']
-        f_read_write['Annotations'][rotated_field].create_dataset('reference', data=class_idx)
+        # create group in hdf5 file for annotations
+        if 'ClassAnnotations' in h5_keys:
+            del f_read_write['ClassAnnotations']
+        f_read_write.create_group('ClassAnnotations')
 
-    f_read_write.close()
+        rotated_fields = list(f_read_write['MVCenterRotatedVolumes'].keys())
+        rotated_fields.sort(key=natural_keys)
+
+        idx = 0
+
+        # iterate through all rotations
+        #for rotated_field in cycle(rotated_fields):
+        while True:
+            rotated_field = rotated_fields[idx]
+            tissue = np.array(f_read_write['MVCenterRotatedVolumes'][rotated_field]['images'])
+
+            imgs = np.empty(shape=(0,tissue.shape[1],tissue.shape[2]))
+
+            print(rotated_field)
+            print("\n")
+
+            plt.imshow(np.transpose(tissue[frame,:,:]), cmap='gray')
+
+            plt.gcf().canvas.mpl_connect('key_press_event', press)
+
+            print("4C = 1, 2C = 2, ALAX = 3\n")
+
+            while not plt.waitforbuttonpress(100000): pass
+
+            plt.clf()
+
+            if user_input == "1" or user_input == "2" or user_input == "3":
+                # get the hdf key
+                h5_keys = f_read_write['ClassAnnotations'].keys()
+
+                # create group in hdf5 file for annotations
+                if rotated_field in h5_keys:
+                    del f_read_write['ClassAnnotations'][rotated_field]
+                f_read_write['ClassAnnotations'].create_group(rotated_field)
+
+                # get the hdf keys
+                h5_keys = f_read_write['ClassAnnotations'][rotated_field].keys()
+
+                if 'reference' in h5_keys:
+                    del f_read_write['ClassAnnotations'][rotated_field]['reference']
+                f_read_write['ClassAnnotations'][rotated_field].create_dataset('reference', data=user_input)
+
+                print("Annotated ", rotated_field, " as ", user_input, ". \n")
+
+            elif user_input == "c":
+                print("Saving and closing file\n")
+                break
+            elif user_input == "left":
+                if idx == 0:
+                    idx = len(rotated_fields)-1
+                else:
+                    idx -= 1
+            else:
+                if idx == len(rotated_fields)-1:
+                    idx = 0
+                else:
+                    idx += 1
+                continue
+
+        f_read_write.close()
+
+main()

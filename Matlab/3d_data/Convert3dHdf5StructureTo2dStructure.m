@@ -2,44 +2,49 @@
 %Started 4.02.2021
 %Author: Anders Tasken
 
-function Convert3dHdf5StructureTo2dStructure(fileNames, outPath) 
+addpath('../dirParsing')
+addpath('../3d_data')
 
-    %filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData/';
-    %outPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/';
+filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/ConvertAnnotated3dTo2dStructure/';
+outPath = '/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/';
 
-    %call the split script for each file
-    for f=1:size(fileNames,2)
+%find all .h5 files
+fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
 
-        %root name from h5 file
-        [path, name, ~] = fileparts(fileNames(f).name);
+%call the split script for each file
+for f=1:size(fileNames,2)
 
-         %show progress
-        fprintf('Converting: %d/%d. \n', f, size(fileNames,2));
+    %root name from h5 file
+    [path, name, ~] = fileparts(fileNames(f).name);
 
-        % Load data
-        inputName = [path name];
+    %show progress
+    fprintf('Converting: %d/%d. \n', f, size(fileNames,2));
 
-        data = HdfImport(inputName);
+    % Load data
+    inputName = [path name];
 
-        fieldNames = fieldnames(data.MVCenterRotatedVolumes);
+    data = HdfImport(inputName);
 
-        newData = struct();
+    fieldNames = fieldnames(data.MVCenterRotatedVolumes);
 
-        for i = 1 : length(fieldNames)
+    newData = struct();
 
-            images = data.MVCenterRotatedVolumes.(fieldNames{i}).images;
+    for i = 1 : length(fieldNames)
 
-            %images = permute(images, [3 1 2]);
+        images = data.MVCenterRotatedVolumes.(fieldNames{i}).images;
 
-            newData.images = images;
+        %images = permute(images, [3 1 2]);
 
-            %filename
-            outName = strcat(outPath, name, '_', fieldNames{i}, '.h5');
+        newData.images = images;
+        
+        reference = data.Annotations.(fieldNames{i}).reference;
 
-            %save file
-            HdfExport(outName, newData);
+        %filename
+        outName = strcat(outPath, name, '_', fieldNames{i}, '.h5');
 
-        end
+        %save file
+        HdfExport(outName, newData);
 
     end
+
 end

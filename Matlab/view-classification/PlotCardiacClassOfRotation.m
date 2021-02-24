@@ -21,9 +21,6 @@ function PlotCardiacClassOfRotation(fileNames)
     alaxArray = zeros(1, 37);
     otherArray = zeros(1, 37);
 
-    true = 0;
-    false = 0;
-
     %call the split script for each file
     for f=1:size(fileNames,2)
 

@@ -20,14 +20,18 @@ print()
 if len(sys.argv) > 1:
     user_input = str(sys.argv[1])
     if user_input == "running_locally":
-        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
-        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
+        #dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
+        #dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
+        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/train"
+        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/val"
         training_info_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/training_info.pth"
         weights_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
         print("Running the code locally")
     elif user_input == "running_ssh":
-        dataset_train_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/train"
-        dataset_val_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/val"
+        #dataset_train_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/train"
+        #dataset_val_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/val"
+        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/train"
+        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/val"
         training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/training_info.pth"
         weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
         print("Running the code remotely with ssh")
