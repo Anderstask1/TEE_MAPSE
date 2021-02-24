@@ -35,6 +35,7 @@ def main():
     else:
         print('Please set correct model name.')
 
+    file_dir = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData/'
     # Load model parameters from state dictionary
     model.load_state_dict(torch.load(model_path, map_location='cpu')['model_state_dict'])
 

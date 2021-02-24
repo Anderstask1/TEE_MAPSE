@@ -36,6 +36,7 @@ def main():
     else:
         print('Please set correct model name.')
 
+
     # Load model parameters from state dictionary
     model.load_state_dict(torch.load(model_path, map_location='cpu')['model_state_dict'])
 

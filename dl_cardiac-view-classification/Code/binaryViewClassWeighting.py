@@ -80,8 +80,8 @@ def main():
                 peak_dist = min(frac_dist_4C, frac_dist_2C, frac_dist_ALAX, key=abs)
 
                 # set annotation weight by gaussian dist
-                annotation_weight = 4
-                if abs(frac_dist_4C) <= 10:
+                annotation_weight = 0
+                if abs(peak_dist) <= 10:
                     if frac_dist_4C == peak_dist:
                         annotation_weight = 1
                     elif frac_dist_2C == peak_dist:
@@ -94,7 +94,7 @@ def main():
                 references = np.full((images.shape[0]), annotation_weight)
 
                 # creating a file
-                with h5py.File(out_dir + file, 'w') as f:
+                with h5py.File(out_dir + file.replace('.h5','') + "_" + rotated_field + '.h5', 'w') as f:
                     f.create_dataset("images", data=images)
                     f.create_dataset('reference', data=references)
                     f.close()

@@ -1,11 +1,11 @@
 %Copy annotations from one hdf5 file to another, for testing
 %Anders Tasken
 %21.11. 2020
-filesPath = '/home/anderstask1/Documents/Kyb/Thesis/3d_ultrasound_data/DataStOlavs_TestData/';
-filesPathAnnotated = '/home/anderstask1/Documents/Kyb/Thesis/3d_ultrasound_data/Annotated_3d_mv-center_rotated_data/test/';
+filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData/';
+filesPathAnnotated = '/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotated/';
 
 %find all .h5 files
-fileNames = parseDirectoryLinux(filesPathAnnotated, 1, '.h5');
+fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
 
 %call for each file
 for f=1:size(fileNames,2)

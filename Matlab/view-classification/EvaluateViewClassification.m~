@@ -109,9 +109,7 @@ for f=1:size(fileNames,2)
         alaxArray(rotationDegree/10+1) = probArray(3);
         otherArray(rotationDegree/10+1) = probArray(4);
         
-        [~, class_idx] = max(probArray);
-        
-        classifiedArray(i) = class_idx - 1;
+        classifiedArray
         
         referenceArray(i) = reference(1);
         
@@ -122,9 +120,7 @@ for f=1:size(fileNames,2)
     probArrayStruct.(fileName).alax = alaxArray;
     probArrayStruct.(fileName).other = otherArray;
     
-    classifiedStruct.(fileName) = classifiedArray;
-    
-    annotatedStruct.(fileName) = referenceArray;
+    annotatedStruct.(fileName).reference = referenceArray;
         
 end
 

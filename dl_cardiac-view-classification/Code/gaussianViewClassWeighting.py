@@ -3,7 +3,6 @@ import numpy as np
 import os
 import re
 
-
 # natural sorting of list
 def atoi(text):
     return int(text) if text.isdigit() else text
@@ -34,10 +33,14 @@ def main():
 
         print(file)
 
-        f_read_write = h5py.File(file_path, 'r')
+        f_read_write = h5py.File(file_path, 'r+')
 
         # get the hdf keys
         h5_keys = f_read_write.keys()
+
+        # create group in hdf5 file for annotations
+        if 'Annotations' in h5_keys:
+            del f_read_write['Annotations']
 
         # check if class annotated
         if 'ClassAnnotations' in h5_keys:
@@ -116,7 +119,7 @@ def main():
                 references = np.full((images.shape[0]), annotation_weight)
 
                 # creating a file
-                with h5py.File(out_dir + file, 'w') as f:
+                with h5py.File(out_dir + file + "_" + rotated_field, 'w') as f:
                     f.create_dataset("images", data=images)
                     f.create_dataset('reference', data=references)
                     f.close()
