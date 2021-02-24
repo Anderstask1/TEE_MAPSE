@@ -19,7 +19,7 @@ def main():
     device = torch.device("cpu")
 
     # folder path to US data
-    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData"
+    file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData"
 
     # model weights from different training data - from floydhub
     # load the model

@@ -5,15 +5,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def train_model(model, device, dataloaders, loss, optimizer, training_info_path: str, weights_path: str, num_epochs=25):
+def train_model(model, device, dataloaders, loss, optimizer, training_info_path: str, weights_path: str, label_encoding: str, num_epochs=25):
 
     print("Training info path: ", training_info_path)
     print("Weights path: ", weights_path)
 
-    #Classification
-    criterion = nn.CrossEntropyLoss()
-    #Regression
-    criterion = nn.MSELoss()
+    if label_encoding == 'binary':
+        #Classification
+        criterion = nn.CrossEntropyLoss()
+    elif label_encoding == 'gaussian':
+        #Regression
+        criterion = nn.MSELoss()
 
     train_info = {'epoch': [], 'loss': [], 'all_loss': []}
     val_info = {'epoch': [], 'loss': [], 'all_loss': []}
@@ -43,7 +45,12 @@ def train_model(model, device, dataloaders, loss, optimizer, training_info_path:
                 with torch.set_grad_enabled(phase == 'train'):
 
                     out = model(sample_batch['image'])
-                    target = torch.DoubleTensor(sample_batch['cardiac_view']).to(device)
+
+                    if label_encoding == 'binary':
+                        target = torch.LongTensor(sample_batch['cardiac_view']).to(device)
+                    elif label_encoding == 'gaussian':
+                        target = torch.DoubleTensor(sample_batch['cardiac_view']).to(device)
+
                     loss = criterion(out, target)
 
                     all_loss = loss.item()
