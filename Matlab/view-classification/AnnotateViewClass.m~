@@ -66,7 +66,7 @@ for i = 1:numel(folderNames)
             
             %Create new hdf5 file to store annotated data
             s = struct('images', permute(data.tissue.data, [3 2 1]));
-            referenceArray = zeros(1,size(data.tissue.data, 1),'int64');
+            referenceArray = zeros(1,size(data.tissue.data, 1),'int64S');
 
             switch idx
                 case 1

@@ -70,8 +70,8 @@ elif run_loc == "running_ssh":
         dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/train_" + data_config
         dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/val_" + data_config
     elif label_encoding == 'gaussian':
-        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train_" + data_config
-        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val_" + data_config
+        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train"
+        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val"
 else:
     print("Running the code on Floydhub")
     training_info_path = "/output/training_info.pth"
