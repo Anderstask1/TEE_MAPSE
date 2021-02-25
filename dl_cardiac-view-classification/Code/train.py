@@ -5,14 +5,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def train_model(model, device, dataloaders, loss, optimizer, training_info_path: str, weights_path: str, label_encoding: str, num_epochs=25):
+def train_model(model, device, dataloaders, loss, optimizer, training_info_path: str, weights_path: str, label_encoding: str, loss_weights, num_epochs=25):
 
     print("Training info path: ", training_info_path)
     print("Weights path: ", weights_path)
 
     if label_encoding == 'binary':
         #Classification
-        criterion = nn.CrossEntropyLoss()
+        #weight each class to prioritize cardiac views over noise (due to imbalance in annotation dataset)
+        #Noise = 0, 4C = 1, 2C = 2, LAX = 3
+        class_weights = torch.FloatTensor(loss_weights).to(device)
+        criterion = nn.CrossEntropyLoss(weight=class_weights)
     elif label_encoding == 'gaussian':
         #Regression
         criterion = nn.MSELoss()

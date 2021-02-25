@@ -4,9 +4,9 @@
 
 %filesPath = '/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train/';
 %filesPath = '/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val/';
-filesPath = '/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/test/';
+filesPath = '/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/';
 
-outPath = '/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/Flip_annotated_data/';
+outPath = '/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/';
 
 %find all .h5 files
 fileNames = parseDirectoryLinux(filesPath, 1, '.h5');

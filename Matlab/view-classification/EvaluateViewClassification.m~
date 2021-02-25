@@ -104,10 +104,10 @@ for f=1:size(fileNames,2)
         
         reference = data.MVCenterRotatedVolumes.(fieldNames{i}).reference;
         
-        otherArray(rotationDegree/10+1) = probArray(1);
-        twoChamberArray(rotationDegree/10+1) = probArray(2);
-        fourChamberArray(rotationDegree/10+1) = probArray(3);
-        alaxArray(rotationDegree/10+1) = probArray(4);
+        twoChamberArray(rotationDegree/10+1) = probArray(1);
+        fourChamberArray(rotationDegree/10+1) = probArray(2);
+        alaxArray(rotationDegree/10+1) = probArray(3);
+        otherArray(rotationDegree/10+1) = probArray(4);
         
         [~, class_idx] = max(probArray);
         
@@ -133,17 +133,10 @@ fn = fieldnames(classifiedStruct);
 
 true = 0;
 false = 0;
-noise = 0;
-true_noise = 0;
 
 for i = 1 : numel(fn)
     for j = 1 : length(annotatedStruct.(fn{i}))
-        if  classifiedStruct.(fn{i})(j) == 0
-            noise = noise + 1;
-            if annotatedStruct.(fn{i})(j) == 0
-                true_noise = true_noise + 1;
-            end
-        elseif annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
+        if annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
             true = true + 1;
         else 
             false = false +1;
@@ -151,8 +144,8 @@ for i = 1 : numel(fn)
     end
 end
 
-fprintf('Classification hit rate: %0.1f%% \n',true/(true + false) * 100);
-fprintf('Noise rate: %0.1f%% \n',true_noise/(noise) * 100);
+fprintf('Classification hit rate: %0.1f%% \n',true/(numel(fn) * length(annotatedStruct.(fn{1}))) * 100);
+fprintf('Classification miss rate: %0.1f%% \n',false/(numel(fn)  * length(annotatedStruct.(fn{1}))) * 100);
 
 %% Plot results
 files = fieldnames(probArrayStruct);

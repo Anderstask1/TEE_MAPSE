@@ -39,8 +39,7 @@ for i = 1 : length(filePaths)
     %%
     modelPath = strcat('/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_new.pth');
     
-    filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData/';
-    %filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/CNN/';
+    filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/';
 
     %find all .h5 files
     fileNames = parseDirectoryLinux(filesPath, 1, '.h5');

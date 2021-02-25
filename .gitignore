@@ -21,4 +21,5 @@ val_old/
 val_new/
 val_mix1/
 CurrentAnnotatingData/
+CurrentClassifyingData/
 dl_cardiac-view-classification/Data*

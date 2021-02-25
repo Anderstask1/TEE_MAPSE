@@ -11,6 +11,7 @@ from torchvision import transforms
 
 batch_size = 32
 num_epochs = 25
+loss_weights = [1.0, 1.0, 1.0, 1.0]
 
 run_loc = 'running_locally'
 model_type = 'CNN'
@@ -25,12 +26,17 @@ if len(sys.argv) > 2:
 if len(sys.argv) > 3:
     label_encoding = str(sys.argv[3])
 
+if len(sys.argv) > 4:
+    str_weights = sys.argv[4].split(",")
+    loss_weights = [float(num) for num in str_weights]
+
 print()
 print(" + Batch size:\t\t\t{}".format(batch_size))
 print(" + Number of epochs:\t\t{}".format(num_epochs))
-print(run_loc + "\n")
-print(model_type + "\n")
-print(label_encoding + "\n")
+print("Location: " + run_loc + "\n")
+print("Model type: " + model_type + "\n")
+print("Binary encoding: " + label_encoding + "\n")
+print("Loss weighting: " + sys.argv[4] + "\n")
 print()
 
 if run_loc == "running_locally":
@@ -50,8 +56,9 @@ if run_loc == "running_locally":
 
 elif run_loc == "running_ssh":
     print("Running the code remotely with ssh")
-    training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/training_info.pth"
-    weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
+
+    training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data/training_info.pth"
+    weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data/best_weights.pth"
 
     if label_encoding == 'binary':
         # dataset_train_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/train"
@@ -62,7 +69,7 @@ elif run_loc == "running_ssh":
         dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train"
         dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val"
 else:
-    print("Running the code remote")
+    print("Running the code on Floydhub")
     training_info_path = "/output/training_info.pth"
     weights_path = "/output/best_weights.pth"
 
@@ -117,4 +124,4 @@ loss = nn.L1Loss()
 
 print("Train model...")
 
-train.train_model(model, device, dataloaders, loss, optimizer, training_info_path, weights_path, label_encoding, num_epochs)
+train.train_model(model, device, dataloaders, loss, optimizer, training_info_path, weights_path, label_encoding, loss_weights, num_epochs)

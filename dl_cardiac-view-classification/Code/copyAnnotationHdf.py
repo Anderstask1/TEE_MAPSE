@@ -12,7 +12,7 @@ def natural_keys(text):
     return [atoi(c) for c in re.split(r'(\d+)', text)]
 
 def main():
-    root_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData"
+    root_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData"
     annotated_dir = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/test"
 
     # get the .h5 files in the directory
