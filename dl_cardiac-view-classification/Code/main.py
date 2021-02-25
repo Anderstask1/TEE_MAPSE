@@ -49,14 +49,16 @@ if run_loc == "running_locally":
     weights_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
 
     if label_encoding == 'binary':
-        #dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
-        #dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
-        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/train_" + data_config
-        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/val_" + data_config
+        if data_config == 'new':
+            dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/train"
+            dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/val"
+        elif data_config == 'old':
+            dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
+            dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
 
     elif label_encoding == 'gaussian':
-        ataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/train_" + data_config
-        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/val_" + data_config
+        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/train"
+        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/val"
 
 elif run_loc == "running_ssh":
     print("Running the code remotely with ssh")
@@ -65,8 +67,6 @@ elif run_loc == "running_ssh":
     weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data/best_weights.pth"
 
     if label_encoding == 'binary':
-        # dataset_train_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/train"
-        # dataset_val_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/val"
         dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/train_" + data_config
         dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/val_" + data_config
     elif label_encoding == 'gaussian':

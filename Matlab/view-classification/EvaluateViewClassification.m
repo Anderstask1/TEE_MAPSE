@@ -143,7 +143,8 @@ for i = 1 : numel(fn)
             if annotatedStruct.(fn{i})(j) == 0
                 true_noise = true_noise + 1;
             end
-        elseif annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
+        end
+        if annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
             true = true + 1;
         else 
             false = false +1;
@@ -152,7 +153,8 @@ for i = 1 : numel(fn)
 end
 
 fprintf('Classification hit rate: %0.1f%% \n',true/(true + false) * 100);
-fprintf('Noise rate: %0.1f%% \n',true_noise/(noise) * 100);
+fprintf('Noise hit rate: %0.1f%% \n',true_noise/(noise) * 100);
+fprintf('Noise rate: %0.1f%% \n',noise/(true + false) * 100);
 
 %% Plot results
 files = fieldnames(probArrayStruct);

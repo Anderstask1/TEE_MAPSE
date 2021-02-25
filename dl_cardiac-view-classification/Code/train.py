@@ -50,6 +50,10 @@ def train_model(model, device, dataloaders, loss, optimizer, training_info_path:
                     out = model(sample_batch['image'])
 
                     if label_encoding == 'binary':
+                        # Classification
+                        out = out.view(out.size(0), -1)
+
+                    if label_encoding == 'binary':
                         target = torch.LongTensor(sample_batch['cardiac_view']).to(device)
                     elif label_encoding == 'gaussian':
                         target = torch.DoubleTensor(sample_batch['cardiac_view']).to(device)

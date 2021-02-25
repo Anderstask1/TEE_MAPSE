@@ -125,7 +125,7 @@ class CNN(nn.Module):
         self.inception5 = Inception2(1024, c_red={"3x3": 48}, c_out={"1x1": 512, "3x3": 512})
         self.conv6 = nn.Conv2d(2048, 4, kernel_size=1, padding=1, stride=1)
         self.relu = nn.PReLU()
-        self.pool6 = nn.AvgPool2d(10)
+        self.pool6 = nn.AvgPool2d(kernel_size=10)
 
 
 
@@ -149,7 +149,7 @@ class CNN(nn.Module):
         x = self.conv6(x)
         x = self.relu(x)
         x = self.pool6(x)
-        return x.view(x.size(0), -1)
+        return x #x.view(x.size(0), -1)
 
 
 class VGG16(nn.Module):

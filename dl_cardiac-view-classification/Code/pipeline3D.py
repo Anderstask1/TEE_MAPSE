@@ -24,7 +24,7 @@ def main():
     # model weights from different training data - from floydhub
     # load the model
     if model_name == 'CNN':
-        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN/best_weights.pth"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN_new/best_weights.pth"
         model = models.CNN()
     elif model_name == 'VGG16':
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
