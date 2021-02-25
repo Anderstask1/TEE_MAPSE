@@ -27,7 +27,10 @@ if len(sys.argv) > 3:
     label_encoding = str(sys.argv[3])
 
 if len(sys.argv) > 4:
-    str_weights = sys.argv[4].split(",")
+    data_config = str(sys.argv[4])
+
+if len(sys.argv) > 5:
+    str_weights = sys.argv[5].split(",")
     loss_weights = [float(num) for num in str_weights]
 
 print()
@@ -36,6 +39,7 @@ print(" + Number of epochs:\t\t{}".format(num_epochs))
 print("Location: " + run_loc + "\n")
 print("Model type: " + model_type + "\n")
 print("Binary encoding: " + label_encoding + "\n")
+print("Data configuration: " + data_config + "\n")
 print("Loss weighting: " + sys.argv[4] + "\n")
 print()
 
@@ -47,12 +51,12 @@ if run_loc == "running_locally":
     if label_encoding == 'binary':
         #dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
         #dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
-        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/train"
-        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/val"
+        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/train_" + data_config
+        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/val_" + data_config
 
     elif label_encoding == 'gaussian':
-        ataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/train"
-        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/val"
+        ataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/train_" + data_config
+        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/val_" + data_config
 
 elif run_loc == "running_ssh":
     print("Running the code remotely with ssh")
@@ -63,18 +67,18 @@ elif run_loc == "running_ssh":
     if label_encoding == 'binary':
         # dataset_train_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/train"
         # dataset_val_path = "/home/atasken/Documents/Thesis/Trym_data_annotated/val"
-        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/train"
-        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/val"
+        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/train_" + data_config
+        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/val_" + data_config
     elif label_encoding == 'gaussian':
-        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train"
-        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val"
+        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train_" + data_config
+        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val_" + data_config
 else:
     print("Running the code on Floydhub")
     training_info_path = "/output/training_info.pth"
     weights_path = "/output/best_weights.pth"
 
-    dataset_train_path = "/train/"
-    dataset_val_path = "/val/"
+    dataset_train_path = "/train/_" + data_config
+    dataset_val_path = "/val/_" + data_config
 
 print("Dataset training path: ", dataset_train_path)
 print("Dataset validation path: ", dataset_val_path)
