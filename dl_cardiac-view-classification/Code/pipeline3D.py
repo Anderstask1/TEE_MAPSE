@@ -20,6 +20,7 @@ def main():
 
     # folder path to US data
     file_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData"
+    file_dir = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData/'
 
     # model weights from different training data - from floydhub
     # load the model
@@ -35,7 +36,7 @@ def main():
     else:
         print('Please set correct model name.')
 
-    file_dir = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData/'
+
     # Load model parameters from state dictionary
     model.load_state_dict(torch.load(model_path, map_location='cpu')['model_state_dict'])
 
@@ -86,8 +87,6 @@ def main():
             model_output = model(model_input)
             model_output = F.softmax(model_output, dim=1)
             model_output = model_output[0,:].numpy()
-
-            #write out the detected landmarks and their movement
 
             #get the hdf keys
             h5_keys = raw_file['MVCenterRotatedVolumes'][fn].keys()

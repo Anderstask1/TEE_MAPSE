@@ -135,15 +135,17 @@ true = 0;
 false = 0;
 
 for i = 1 : numel(fn)
-    if annotatedStruct.(fn{i}) == classifiedStruct.(fn{i}) 
-        true = true + 1;
-    else 
-        false = false +1;
+    for j = 1 : length(annotatedStruct.(fn{i}))
+        if annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
+            true = true + 1;
+        else 
+            false = false +1;
+        end
     end
 end
 
-fprintf('Classification hit rate: %d%% \n',true/numel(fn) * 100);
-fprintf('Classification miss rate: %d%% \n',false/numel(fn) * 100);
+fprintf('Classification hit rate: %0.1f%% \n',true/(numel(fn) * length(annotatedStruct.(fn{1}))) * 100);
+fprintf('Classification miss rate: %0.1f%% \n',false/(numel(fn)  * length(annotatedStruct.(fn{1}))) * 100);
 
 %% Plot results
 files = fieldnames(probArrayStruct);

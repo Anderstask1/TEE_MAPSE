@@ -2,14 +2,14 @@
 %Started 28.01.2021
 %Author: Anders Tasken
 
+addpath('/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/Matlab')
+
 %create folder for transformation matrices
 directoryPath = '/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated';
 if ~exist(directoryPath, 'dir')
     % Folder does not exist so create it.
     mkdir(directoryPath);
 end
-
-addpath('/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/Matlab')
 
 folderPath = '/home/anderstask1/Documents/Kyb/Thesis/Trym_data/';
 foldersStruct = dir(fullfile(folderPath,'*'));
