@@ -58,9 +58,9 @@ classifiedStruct = struct();
 annotatedStruct = struct();
 probArrayStruct = struct();
 
-classesArray = zeros(1, 37);
+classifiedArray = nan(1, 37);
 
-referenceArray = zeros(1, 37);
+referenceArray = nan(1, 37);
 
 twoChamberArray = zeros(1, 37);
 fourChamberArray = zeros(1, 37);
@@ -109,9 +109,11 @@ for f=1:size(fileNames,2)
         fourChamberArray(rotationDegree/10+1) = probArray(3);
         alaxArray(rotationDegree/10+1) = probArray(4);
         
-        [~, class_idx] = max(probArray);
+        [class_conf, class_idx] = max(probArray);
         
-        classifiedArray(i) = class_idx - 1;
+        if class_conf > 0.9
+            classifiedArray(i) = class_idx - 1;
+        end
         
         referenceArray(i) = reference(1);
         
@@ -144,10 +146,12 @@ for i = 1 : numel(fn)
                 true_noise = true_noise + 1;
             end
         end
-        if annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
-            true = true + 1;
-        else 
-            false = false +1;
+        if ~isnan(classifiedStruct.(fn{i})(j))
+            if annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
+                true = true + 1;
+            else 
+                false = false +1;
+            end
         end
     end
 end
@@ -166,5 +170,6 @@ for f = 1 : numel(files)
    plot(probArrayStruct.(files{f}).twoChamber);
    plot(probArrayStruct.(files{f}).alax);
    plot(probArrayStruct.(files{f}).other);
+   title(files{f});
    legend('4C', '2C', 'ALAX', 'Other');
 end

@@ -239,10 +239,10 @@ for i = 1 : length(filePaths)
     
     %% Compute area of mitral valve
     
-    %MitralValveAreaComputation(fileNames, 'all-views');
+    MitralValveAreaComputation(fileNames, 'all-views');
     
     %% Compute perimeter of mitral valve
     
-    %MitralValvePerimeterComputation(fileNames, 'all-views');
+    MitralValvePerimeterComputation(fileNames, 'all-views');
 end
 

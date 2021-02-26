@@ -94,7 +94,7 @@ def main():
                 references = np.full((images.shape[0]), annotation_weight)
 
                 # creating a file
-                with h5py.File(out_dir + file.replace('.h5','') + "_" + rotated_field + '.h5', 'w') as f:
+                with h5py.File(out_dir + file.replace('.h5','_') + rotated_field + '.h5', 'w') as f:
                     f.create_dataset("images", data=images)
                     f.create_dataset('reference', data=references)
                     f.close()

@@ -33,14 +33,14 @@ def main():
 
         print(file)
 
-        f_read_write = h5py.File(file_path, 'r+')
+        f_read = h5py.File(file_path, 'r')
 
         # get the hdf keys
-        h5_keys = f_read_write.keys()
+        h5_keys = f_read.keys()
 
         # create group in hdf5 file for annotations
         if 'Annotations' in h5_keys:
-            del f_read_write['Annotations']
+            del f_read['Annotations']
 
         # check if class annotated
         if 'ClassAnnotations' in h5_keys:
@@ -50,14 +50,14 @@ def main():
             #     del f_read_write['Annotations']
             # f_read_write.create_group('Annotations')
 
-            rotated_fields = list(f_read_write['MVCenterRotatedVolumes'].keys())
+            rotated_fields = list(f_read['MVCenterRotatedVolumes'].keys())
             rotated_fields.sort(key=natural_keys)
 
             rotation_4C, rotation_2C, rotation_ALAX = -1, -1, -1
 
             # iterate through all annotations
-            for annotated_field in f_read_write['ClassAnnotations']:
-                field_value = f_read_write['ClassAnnotations'][annotated_field]['reference'].value
+            for annotated_field in f_read['ClassAnnotations']:
+                field_value = f_read['ClassAnnotations'][annotated_field]['reference'].value
                 if field_value:
                     class_idx = int(field_value)  # get field value
                     rotation_angle = int(annotated_field.split('_')[2])  # parse field name
@@ -77,49 +77,27 @@ def main():
                 rotation_angle = int(rotated_field.split('_')[2])
 
                 # find angular distance to closest annotated view
-                frac_dist_4C = (rotation_angle - rotation_4C + 90) % 180 - 90
-                frac_dist_2C = (rotation_angle - rotation_2C + 90) % 180 - 90
-                frac_dist_ALAX = (rotation_angle - rotation_ALAX + 90) % 180 - 90
-                peak_dist = min(frac_dist_4C, frac_dist_2C, frac_dist_ALAX, key=abs)
+                frac_dist_4C = abs(rotation_angle - rotation_4C + 90) % 180 - 90
+                frac_dist_2C = abs(rotation_angle - rotation_2C + 90) % 180 - 90
+                frac_dist_ALAX = abs(rotation_angle - rotation_ALAX + 90) % 180 - 90
 
-                sd = 30
-                gaussian_tail = np.exp(-(peak_dist / (np.sqrt(2) * sd)) ** 2)
+                sd = 20
 
-                # set annotation weight by gaussian dist
-                if frac_dist_4C == peak_dist:
-                    if frac_dist_4C > 0:
-                        #sd = abs((rotation_4C - rotation_2C + 180) % 360 - 180) / 3
-                        #gaussian_tail = np.exp(-(peak_dist / (np.sqrt(2) * sd)) ** 2)
-                        annotation_weight = 1 + (1 - gaussian_tail)
-                    else:
-                        #sd = abs((rotation_4C - rotation_ALAX + 180) % 360 - 180) / 3
-                        #gaussian_tail = np.exp(-(peak_dist / (np.sqrt(2) * sd)) ** 2)
-                        annotation_weight = 1 - (1 - gaussian_tail)
-                elif frac_dist_2C == peak_dist:
-                    if frac_dist_2C > 0:
-                        #sd = abs((rotation_2C - rotation_ALAX + 180) % 360 - 180) / 3
-                        #gaussian_tail = np.exp(-(peak_dist / (np.sqrt(2) * sd)) ** 2)
-                        annotation_weight = 2 + (1 - gaussian_tail)
-                    else:
-                        #sd = abs((rotation_2C - rotation_4C + 180) % 360 - 180) / 3
-                        #gaussian_tail = np.exp(-(peak_dist / (np.sqrt(2) * sd)) ** 2)
-                        annotation_weight = 2 - (1 - gaussian_tail)
-                elif frac_dist_ALAX == peak_dist:
-                    if frac_dist_ALAX > 0:
-                        #sd = abs((rotation_ALAX - rotation_4C + 180) % 360 - 180) / 3
-                        #gaussian_tail = np.exp(-(peak_dist / (np.sqrt(2) * sd)) ** 2)
-                        annotation_weight = 3 + (1 - gaussian_tail)
-                    else:
-                        #sd = abs((rotation_ALAX - rotation_2C + 180) % 360 - 180) / 3
-                        gaussian_tail = np.exp(-(peak_dist / (np.sqrt(2) * sd)) ** 2)
-                        annotation_weight = 3 - (1 - gaussian_tail)
+                gaussian_tail = np.exp(-(frac_dist_4C / (np.sqrt(2) * sd)) ** 2)
+                annotation_weight_4C = gaussian_tail
+
+                gaussian_tail = np.exp(-(frac_dist_2C / (np.sqrt(2) * sd)) ** 2)
+                annotation_weight_2C = gaussian_tail
+
+                gaussian_tail = np.exp(-(frac_dist_ALAX / (np.sqrt(2) * sd)) ** 2)
+                annotation_weight_ALAX = gaussian_tail
 
                 # save annotation in new file
-                images = f_read_write['MVCenterRotatedVolumes'][rotated_field]['images'].value
-                references = np.full((images.shape[0]), annotation_weight)
+                images = f_read['MVCenterRotatedVolumes'][rotated_field]['images'].value
+                references = np.full((images.shape[0], 3), [annotation_weight_4C, annotation_weight_2C, annotation_weight_ALAX])
 
                 # creating a file
-                with h5py.File(out_dir + file + "_" + rotated_field, 'w') as f:
+                with h5py.File(out_dir + file.replace('.h5', '_') + rotated_field + '.h5', 'w') as f:
                     f.create_dataset("images", data=images)
                     f.create_dataset('reference', data=references)
                     f.close()

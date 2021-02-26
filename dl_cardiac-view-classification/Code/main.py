@@ -70,8 +70,8 @@ elif run_loc == "running_ssh":
         dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/train_" + data_config
         dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/val_" + data_config
     elif label_encoding == 'gaussian':
-        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train"
-        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val"
+        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train_" + data_config
+        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val_" + data_config
 else:
     print("Running the code on Floydhub")
     training_info_path = "/output/training_info.pth"
@@ -100,16 +100,20 @@ dataloaders = {
     'train':DataLoader(datasets['train'], batch_size=batch_size, shuffle=True, num_workers=4),
     'val':DataLoader(datasets['val'], batch_size=1, shuffle=False, num_workers=4)}
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 
-if torch.cuda.is_available():
+if device.type == 'cuda':
     print("Using cuda for gpu-accelerated computations")
 else:
     print("Using cpu for computations")
 
-if model_type == "CNN":
-    model = models.CNN()
-    print("Model architecture: CNN")
+if model_type == "CNN_classification":
+    model = models.CNN_classification()
+    print("Model architecture: CNN_classification")
+elif model_type == "CNN_regression":
+    model = models.CNN_regression()
+    print("Model architecture: CNN_regression")
 elif model_type == "VGG16":
     model = models.VGG16()
     print("Model architecture: VGG16")

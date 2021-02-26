@@ -10,7 +10,7 @@ folderPath = '/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/
 %find all .h5 files
 fileNames = parseDirectoryLinux(folderPath, 1, '.h5');
 
-weights = zeros(3, 37);
+weights = zeros(37, 3);
 
 %call the split script for each file
 for f=1:size(fileNames,2)
@@ -23,15 +23,10 @@ for f=1:size(fileNames,2)
         % Load data
         inputName = [path name];
         
-        data = HdfImport(inputName);
+        data = HdfImport(inputName)
         
         nameSplit = split(name, '_');
-        
-        rotation = str2num(nameSplit{4});
 
-        if rotation ~= 0
-            weights(:,rotation/10) = data.reference(:,1);
-        end
+        weights(nameSplit{4},:) = data.reference;
     end
 end
-

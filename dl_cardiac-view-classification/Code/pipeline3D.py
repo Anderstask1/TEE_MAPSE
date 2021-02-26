@@ -10,7 +10,7 @@ from preProcessor import PreProcessor
 
 def main():
 
-    model_name = 'CNN' # 'CNN' - 'VGG16' - 'ResNext'
+    model_name = 'ResNext' # 'CNN_classification' - 'CNN_regression' - 'VGG16' - 'ResNext'
 
     if len(sys.argv) > 1:
         model_name = str(sys.argv[1])
@@ -30,11 +30,21 @@ def main():
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
         model = models.VGG16()
     elif model_name == 'ResNext':
-        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext/best_weights.pth"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext_new/best_weights.pth"
         model = models.ResNext()
     else:
         print('Please set correct model name.')
 
+    print()
+    print("File path: " + file_dir + "\n")
+    print("Running pipeline with model: " + model_name + "\n")
+    print("Model path: " + model_path + "\n")
+    print()
+
+    if torch.cuda.is_available():
+        print("Using cuda for gpu-accelerated computations")
+    else:
+        print("Using cpu for computations")
 
     # Load model parameters from state dictionary
     model.load_state_dict(torch.load(model_path, map_location='cpu')['model_state_dict'])

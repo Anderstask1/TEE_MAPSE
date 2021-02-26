@@ -18,7 +18,7 @@ def train_model(model, device, dataloaders, loss, optimizer, training_info_path:
         criterion = nn.CrossEntropyLoss(weight=class_weights)
     elif label_encoding == 'gaussian':
         #Regression
-        criterion = nn.MSELoss()
+        criterion = nn.L1Loss()
 
     train_info = {'epoch': [], 'loss': [], 'all_loss': []}
     val_info = {'epoch': [], 'loss': [], 'all_loss': []}
@@ -48,10 +48,6 @@ def train_model(model, device, dataloaders, loss, optimizer, training_info_path:
                 with torch.set_grad_enabled(phase == 'train'):
 
                     out = model(sample_batch['image'])
-
-                    if label_encoding == 'binary':
-                        # Classification
-                        out = out.view(out.size(0), -1)
 
                     if label_encoding == 'binary':
                         target = torch.LongTensor(sample_batch['cardiac_view']).to(device)
