@@ -101,8 +101,9 @@ dataloaders = {
     'train':DataLoader(datasets['train'], batch_size=batch_size, shuffle=True, num_workers=4),
     'val':DataLoader(datasets['val'], batch_size=1, shuffle=False, num_workers=4)}
 
-#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+if run_loc == "running_locally":
+    device = torch.device("cpu")
 
 if device.type == 'cuda':
     print("Using cuda for gpu-accelerated computations")
