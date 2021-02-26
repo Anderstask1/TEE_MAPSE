@@ -63,15 +63,16 @@ if run_loc == "running_locally":
 elif run_loc == "running_ssh":
     print("Running the code remotely with ssh")
 
-    training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data/training_info.pth"
-    weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data/best_weights.pth"
-
     if label_encoding == 'binary':
         dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/train_" + data_config
         dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/val_" + data_config
+        training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_binary/training_info.pth"
+        weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_binary/best_weights.pth"
     elif label_encoding == 'gaussian':
         dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train_" + data_config
         dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val_" + data_config
+        training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_gaussian/training_info.pth"
+        weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_gaussian/best_weights.pth"
 else:
     print("Running the code on Floydhub")
     training_info_path = "/output/training_info.pth"
