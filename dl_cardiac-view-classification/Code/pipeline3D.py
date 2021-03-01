@@ -10,7 +10,7 @@ from preProcessor import PreProcessor
 
 def main():
 
-    model_name = 'ResNext' # 'CNN_classification' - 'CNN_regression' - 'VGG16' - 'ResNext'
+    model_name = 'CNN_classification' # 'CNN_classification' - 'CNN_regression' - 'VGG16' - 'ResNext'
 
     if len(sys.argv) > 1:
         model_name = str(sys.argv[1])
@@ -23,9 +23,12 @@ def main():
 
     # model weights from different training data - from floydhub
     # load the model
-    if model_name == 'CNN':
-        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN_new/best_weights.pth"
-        model = models.CNN()
+    if model_name == 'CNN_classification':
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN_mix/best_weights.pth"
+        model = models.CNN_classification()
+    if model_name == 'CNN_regression':
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN_gaussian_new/best_weights.pth"
+        model = models.CNN_regression()
     elif model_name == 'VGG16':
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
         model = models.VGG16()

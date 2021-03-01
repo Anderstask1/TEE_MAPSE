@@ -22,5 +22,6 @@ val_new/
 val_mix1/
 CurrentAnnotatingData/
 CurrentClassifyingData/
+CurrentClassifyingData_1degree/
 dl_cardiac-view-classification/Data*
 dl_cardiac-view-classification/Trym_data_training

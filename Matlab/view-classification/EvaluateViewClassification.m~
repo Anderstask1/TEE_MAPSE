@@ -237,7 +237,7 @@ for f=1:size(fileNames,2)
         [class_conf, class_idx] = max(probArray);
         
         %
-        if class_conf > 0.5
+        if class_conf > 0.45
             classifiedArray(i) = class_idx;
         else
             classifiedArray(i) = 0;
@@ -271,15 +271,15 @@ noise = 0;
 
 for i = 1 : numel(fn)
     for j = 1 : length(annotatedStruct.(fn{i}))
-        if  ~annotatedStruct.(fn{i})(j) == 0
+        %if  ~annotatedStruct.(fn{i})(j) == 0
             if annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
                 true = true + 1;
             else 
                 false = false + 1;
             end
-        else
-            noise = noise + 1;
-        end
+        %else
+            %noise = noise + 1;
+        %end
     end
 end
 

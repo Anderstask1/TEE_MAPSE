@@ -14,6 +14,7 @@ def natural_keys(text):
 
 def main():
     root_dir = "/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotated"
+    root_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData_1degree"
     out_dir = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/"
 
     # get the .h5 files in the directory
@@ -38,17 +39,8 @@ def main():
         # get the hdf keys
         h5_keys = f_read.keys()
 
-        # create group in hdf5 file for annotations
-        if 'Annotations' in h5_keys:
-            del f_read['Annotations']
-
         # check if class annotated
         if 'ClassAnnotations' in h5_keys:
-
-            # # create group in hdf5 file for annotations
-            # if 'Annotations' in h5_keys:
-            #     del f_read_write['Annotations']
-            # f_read_write.create_group('Annotations')
 
             rotated_fields = list(f_read['MVCenterRotatedVolumes'].keys())
             rotated_fields.sort(key=natural_keys)
