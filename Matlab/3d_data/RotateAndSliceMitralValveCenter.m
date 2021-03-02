@@ -22,21 +22,38 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
         %% Load data
         fileName = strcat(name,'.h5'); 
         filePath = strcat(path, fileName);
-        hdfdata = HdfImport(filePath);
+        
+        %hdfdata = HdfImport(filePath);
+        %frameNo = length(fieldnames(hdfdata.CartesianVolumes));
 
         %number of frames
-        frameNo = length(fieldnames(hdfdata.CartesianVolumes));
-
+        infoCartesianVolumes = h5info(filePath, '/CartesianVolumes');
+        frameNo = length(infoCartesianVolumes.Datasets);
+        
+        %{
         %volumetric data
         vol1 = hdfdata.CartesianVolumes.vol01;
         boundingBox = imref3d(size(vol1));
-        sz =size(vol1);
+        sz = size(vol1);
+        %}
         
+        infoVol01 = h5info(filePath, '/CartesianVolumes/vol01');
+        sz = infoVol01.Dataspace.Size;
+        boundingBox = imref3d(sz);
+        
+        info = h5info(filePath);
+        if ~any(strcmp({info.Groups.Name}, '/RotatedVolumes'))
+            fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
+            continue
+        end
+        
+        %{
         %check if volume is rotated
         if ~any(strcmp(fieldnames(hdfdata),'RotatedVolumes'))
             fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
             continue
         end
+        %}
         
         %load optMapseAngles
         filename = strcat(path, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');
@@ -52,7 +69,10 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
         fieldName = strcat('rotated_by_', int2str(optMapseAngle),'_degrees');
 
         %get landmark coordinates
-        mapseLandmarks = hdfdata.RotatedVolumes.(fieldName).MAPSE_detected_landmarks';
+        %mapseLandmarks = hdfdata.RotatedVolumes.(fieldName).MAPSE_detected_landmarks';
+        
+        ds = strcat('/RotatedVolumes/', fieldName, '/MAPSE_detected_landmarks')
+        mapseLandmarks = h5read(filePath, ds)';
 
         %stop iteration if no landmark at specified angle
         if isnan(mapseLandmarks)
@@ -137,12 +157,17 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
             %% Extract slices with rotation around mv center
             %matrix of 2d slices for sequence
             %allocate
-            slices = zeros(size(vol1, 1), size(vol1, 3), frameNo); 
+            %slices = zeros(size(vol1, 1), size(vol1, 3), frameNo); 
+            
+            slices = zeros(sz(1), sz(3), frameNo); 
 
             for frame = 1:frameNo
                 %get the 3D frame
                 volName = sprintf('vol%02d', frame);
-                imageData = hdfdata.CartesianVolumes.(volName);
+                %imageData = hdfdata.CartesianVolumes.(volName);
+                
+                ds = strcat('/CartesianVolumes/', volName);
+                imageData = h5read(filePath, ds);
                 
                 %rotate volume
                 processedData = uint8(imwarp(imageData, mv_tform, 'OutputView', boundingBox));
@@ -153,12 +178,20 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
 
             %save slice sequence to .h5 file
             fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
-            hdfdata.MVCenterRotatedVolumes.(fieldName).images = slices;
+            %hdfdata.MVCenterRotatedVolumes.(fieldName).images = slices;
 
             %new filename
             outName = strcat(path, name, '.h5');
+            ds = strcat('/MVCenterRotatedVolumes/', fieldName, '/images');
+            
+            try
+                h5create(outName, ds, size(slices));
+                h5write(outName, ds, slices);
+            catch
+                h5write(outName, ds, slices);
+            end
 
-            HdfExport(outName, hdfdata);
+            %HdfExport(outName, hdfdata);
         end
     end
 end

@@ -47,13 +47,13 @@ for i = 1 : length(filePaths)
     %% Hyperparameters
 
     %Rotate volume from start-angle to end-angle with degree step
-    startAngleCenter = 60;
-    endAngleCenter = 120;
+    startAngleCenter = 80;
+    endAngleCenter = 100;
     stepDegreeCenter = 1;
 
     %Rotate volume from start-angle to end-angle with degree step
     startAngleRotate = 0;
-    endAngleRotate = 360;
+    endAngleRotate = 359;
     stepDegreeRotate = 1;
     % % 
     % Threshold for probability map - binary CoM
@@ -86,6 +86,10 @@ for i = 1 : length(filePaths)
 
     %rotate 3d data
     RotateVolumeYAxis3D(fileNames, startAngleCenter, endAngleCenter, stepDegreeCenter);
+    
+    %% TIME FUNC
+    %f = @() RotateVolumeYAxis3D(fileNames, startAngleCenter, endAngleCenter, stepDegreeCenter);
+    %timeit(f)
 
     %% Save image from first frame of y-axis rotation
     disp('Save image slice from volume rotated around y axis');
@@ -117,6 +121,10 @@ for i = 1 : length(filePaths)
     disp('Rotate volume around MV center');
 
     RotateAndSliceMitralValveCenter(fileNames, startAngleRotate, endAngleRotate, stepDegreeRotate);
+    
+    %% TIME FUNC
+    %f = @() RotateAndSliceMitralValveCenter(fileNames, startAngleRotate, endAngleRotate, stepDegreeRotate);
+    %timeit(f)
 
     %% Save images of mv center rotation
     disp('Save images of slices rotated around MV center');

@@ -119,9 +119,15 @@ elif model_type == "CNN_regression":
 elif model_type == "VGG16":
     model = models.VGG16()
     print("Model architecture: VGG16")
-elif model_type == "ResNext":
-    model = models.ResNext()
+elif model_type == "VGG16_regression":
+    model = models.VGG16_regression()
+    print("Model architecture: VGG16_regression")
+elif model_type == "ResNext_classification":
+    model = models.ResNext_classification()
     print("Model architecture: ResNext")
+elif model_type == "ResNext_regression":
+    model = models.ResNext_regression()
+    print("Model architecture: ResNext_regression")
 else:
     print("User input don't match a model name. Please input another network architecture name.")
     sys.exit()

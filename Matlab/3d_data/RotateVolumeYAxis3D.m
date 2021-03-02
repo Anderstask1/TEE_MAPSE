@@ -13,14 +13,20 @@ function RotateVolumeYAxis3D(fileNames, startAngle, endAngle, stepDegree)
 
         %% Load data
         inputName = [path name];
+        filename = strcat(inputName, '.h5');
+        
+        infoCartesianVolumes = h5info(filename, '/CartesianVolumes');
 
-        data = HdfImport(inputName);
+        %data = HdfImport(inputName);
 
         %number of frames
         %frameNo = length(fieldnames(data.CartesianVolumes));
 
         %volumetric data
-        vol1 = data.CartesianVolumes.vol01;
+        %vol1 = data.CartesianVolumes.vol01;
+        vol1 = h5read(filename, '/CartesianVolumes/vol01');
+        vol2 = h5read(filename, '/CartesianVolumes/vol02');
+        vol3 = h5read(filename, '/CartesianVolumes/vol03');
         boundingBox = imref3d(size(vol1));
         sz =size(vol1);
 
@@ -74,27 +80,33 @@ function RotateVolumeYAxis3D(fileNames, startAngle, endAngle, stepDegree)
 
             %matrix of 2d slices for sequence
             %allocate
-            imageData = data.CartesianVolumes.('vol01');
-            slices = zeros(size(imageData, 1), size(imageData, 3), 3); %reduce computational cost by only reviewing 3 images, not frameNo
+            slices = zeros(size(vol1, 1), size(vol1, 3), 3); %reduce computational cost by only reviewing 3 images, not frameNo
             
             %make sure there is enough recorded volumes
-            if size(fieldnames(data.CartesianVolumes),1) < 3
+            if length(infoCartesianVolumes.Datasets) < 3
                 fprintf('Skipping %s due to missing recordings (below 3).\n', inputName)
                 continue
             end
+            
+            %rotate volume
+            processedData = uint8(imwarp(vol1, tform, 'OutputView', boundingBox));
 
-            for frame = 1:3%frameNo
-                %get the 3D frame
-                volName = sprintf('vol%02d', frame);
-                imageData = data.CartesianVolumes.(volName);
+            %get slize from 3D frame
+            slices(:,:,1) = squeeze(processedData(:,round(end*0.5),:));
+            
+            %rotate volume
+            processedData = uint8(imwarp(vol2, tform, 'OutputView', boundingBox));
 
-                %rotate volume
-                processedData = uint8(imwarp(imageData, tform, 'OutputView', boundingBox));
+            %get slize from 3D frame
+            slices(:,:,2) = squeeze(processedData(:,round(end*0.5),:));
+            
+            %rotate volume
+            processedData = uint8(imwarp(vol3, tform, 'OutputView', boundingBox));
 
-                %get slize from 3D frame
-                slices(:,:,frame) = squeeze(processedData(:,round(end*0.5),:));
-            end
+            %get slize from 3D frame
+            slices(:,:,3) = squeeze(processedData(:,round(end*0.5),:));
 
+            %{
             %delete field if there from beforehand
             if angle == startAngle
                 if isfield(data, 'RotatedVolumes')
@@ -104,12 +116,25 @@ function RotateVolumeYAxis3D(fileNames, startAngle, endAngle, stepDegree)
 
             %save slice sequence to .h5 file
             fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
-            data.RotatedVolumes.(fieldName).images = slices;       
-
+            data.RotatedVolumes.(fieldName).images = slices;   
+            
             %new filename
             outName = strcat(inputName,'.h5');
 
             HdfExport(outName, data);
+        
+            %}
+            filename = strcat(inputName, '.h5');
+            fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
+            ds = strcat('/RotatedVolumes/', fieldName, '/images');
+            
+            try
+                h5create(filename, ds, size(slices));
+                h5write(filename, ds, slices);
+            catch
+                h5write(filename, ds, slices);
+            end
+            
         end
     end
 end

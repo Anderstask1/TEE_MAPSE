@@ -222,11 +222,11 @@ class CNN_regression(nn.Module):
         return x.view(x.size(0), -1)
 
 
-class VGG16(nn.Module):
+class VGG16_classification(nn.Module):
     """ Neural Network classifying cardiac US views based on VGG16 architecture"""
 
     def __init__(self):
-        super(VGG16, self).__init__()
+        super(VGG16_classification, self).__init__()
         self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
 
         vgg16 = models.vgg16_bn(pretrained=True, progress=False) # import vgg16 model
@@ -240,10 +240,29 @@ class VGG16(nn.Module):
         x = self.conv(x)
         return self.vgg(x)
 
-class ResNext(nn.Module):
+
+class VGG16_regression(nn.Module):
+    """ Neural Network classifying cardiac US views based on VGG16 architecture"""
 
     def __init__(self):
-        super(ResNext, self).__init__()
+        super(VGG16_regression, self).__init__()
+        self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
+
+        vgg16 = models.vgg16_bn(pretrained=True, progress=False) # import vgg16 model
+        num_features = vgg16.classifier[6].in_features
+        features = list(vgg16.classifier.children())[:-1]  # Remove last layer
+        features.extend([nn.Linear(num_features, 3)])  # Add our layer with 3 outputs
+        vgg16.classifier = nn.Sequential(*features) # Add modified classifier to model
+        self.vgg = vgg16
+
+    def forward(self, x):
+        x = self.conv(x)
+        return self.vgg(x)
+
+class ResNext_classification(nn.Module):
+
+    def __init__(self):
+        super(ResNext_classification, self).__init__()
         self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
 
         resnext = models.resnext50_32x4d(pretrained=True, progress=False)
@@ -260,6 +279,32 @@ class ResNext(nn.Module):
             param.require_grad = False
 
         resnext.fc = nn.Linear(resnext.fc.in_features, 4) # Add our layer with 4 outputs
+        self.resnext = resnext
+
+    def forward(self, x):
+        x = self.conv(x)
+        return self.resnext(x)
+
+class ResNext_regression(nn.Module):
+
+    def __init__(self):
+        super(ResNext_regression, self).__init__()
+        self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
+
+        resnext = models.resnext50_32x4d(pretrained=True, progress=False)
+        #resnext = models.resnext101_32x8d(pretrained=True, progress=False)
+
+        # Freeze training for layers
+        for param in resnext.layer1.parameters():
+            param.require_grad = False
+        for param in resnext.layer2.parameters():
+            param.require_grad = False
+        for param in resnext.layer3.parameters():
+            param.require_grad = False
+        for param in resnext.layer4.parameters():
+            param.require_grad = False
+
+        resnext.fc = nn.Linear(resnext.fc.in_features, 3) # Add our layer with 3 outputs
         self.resnext = resnext
 
     def forward(self, x):

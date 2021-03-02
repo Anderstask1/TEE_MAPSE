@@ -9,8 +9,8 @@ from Models import models
 from preProcessor import PreProcessor
 
 def main():
-
-    model_name = 'CNN_classification' # 'CNN_classification' - 'CNN_regression' - 'VGG16' - 'ResNext'
+    # 'CNN_classification' - 'CNN_regression' - 'VGG16_classification' - 'VGG16_regression' - 'ResNext_classification' - 'ResNext_regression'
+    model_name = 'CNN_classification'
 
     if len(sys.argv) > 1:
         model_name = str(sys.argv[1])
@@ -29,12 +29,18 @@ def main():
     if model_name == 'CNN_regression':
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN_gaussian_new/best_weights.pth"
         model = models.CNN_regression()
-    elif model_name == 'VGG16':
+    elif model_name == 'VGG16_classification':
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
-        model = models.VGG16()
-    elif model_name == 'ResNext':
+        model = models.VGG16_classification()
+    elif model_name == 'VGG16_regression':
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
+        model = models.VGG16_regression()
+    elif model_name == 'ResNext_classification':
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext_new/best_weights.pth"
-        model = models.ResNext()
+        model = models.ResNext_classification()
+    elif model_name == 'ResNext_regression':
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext_new/best_weights.pth"
+        model = models.ResNext_regression()
     else:
         print('Please set correct model name.')
 
