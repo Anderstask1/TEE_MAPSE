@@ -109,7 +109,7 @@ for i = 1 : length(filePaths)
     %% Save image of y-axis rotated slices with landmarks
     disp('Save images of y-axis rotated slices with landmarks');
 
-    %SaveSliceImageWithLandmarksHdf(fileNames, 'RotatedVolumes');
+    SaveSliceImageWithLandmarksHdf(fileNames, 'RotatedVolumes');
 
     %% Find optimal angle for mitral valve center computation
     disp('Find optimal y-axis rotation angle');

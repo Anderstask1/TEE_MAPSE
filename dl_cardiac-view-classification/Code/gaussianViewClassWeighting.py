@@ -13,8 +13,8 @@ def natural_keys(text):
 
 
 def main():
-    root_dir = "/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotated"
-    root_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentAnnotatingData"
+    #root_dir = "/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotated"
+    root_dir = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData"
     out_dir = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/"
 
     # get the .h5 files in the directory

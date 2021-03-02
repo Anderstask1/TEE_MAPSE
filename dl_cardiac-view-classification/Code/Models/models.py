@@ -265,8 +265,8 @@ class ResNext_classification(nn.Module):
         super(ResNext_classification, self).__init__()
         self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
 
-        resnext = models.resnext50_32x4d(pretrained=True, progress=False)
-        #resnext = models.resnext101_32x8d(pretrained=True, progress=False)
+        #resnext = models.resnext50_32x4d(pretrained=True, progress=False)
+        resnext = models.resnext101_32x8d(pretrained=True, progress=False)
 
         # Freeze training for layers
         for param in resnext.layer1.parameters():
@@ -291,8 +291,8 @@ class ResNext_regression(nn.Module):
         super(ResNext_regression, self).__init__()
         self.conv = nn.Conv2d(1, 3, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=True) # 3 channel input
 
-        resnext = models.resnext50_32x4d(pretrained=True, progress=False)
-        #resnext = models.resnext101_32x8d(pretrained=True, progress=False)
+        #resnext = models.resnext50_32x4d(pretrained=True, progress=False)
+        resnext = models.resnext101_32x8d(pretrained=True, progress=False)
 
         # Freeze training for layers
         for param in resnext.layer1.parameters():
