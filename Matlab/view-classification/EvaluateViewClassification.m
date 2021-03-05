@@ -39,7 +39,7 @@ for f=1:size(fileNames,2)
     
     if annotatedClass == classifiedClass
         true = true + 1;
-    else
+    elsehttps://media-exp1.licdn.com/dms/image/C4E03AQGV9b8eWaYwAg/profile-displayphoto-shrink_400_400/0/1601755823867?e=1620259200&v=beta&t=eDbM_SYOQH4NJF9hfSpsbtYRuwQf9TtU43cjo1k7KxA
         false = false + 1;
     end
 
@@ -181,30 +181,25 @@ folderPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyin
 %find all .h5 files
 fileNames = parseDirectoryLinux(folderPath, 1, '.h5');
 
+%degree of rotation between each 2d image
+stepDegree = 1;
+
 classifiedStruct = struct();
-annotatedStruct = struct();
+%annotatedStruct = struct();
 probArrayStruct = struct();
-
-classifiedArray = nan(1, 37);
-
-referenceArray = nan(1, 37);
-
-twoChamberArray = zeros(1, 37);
-fourChamberArray = zeros(1, 37);
-alaxArray = zeros(1, 37);
-
-true = 0;
-false = 0;
 
 %call the split script for each file
 for f=1:size(fileNames,2)
 
     %root name from h5 file
     [path, name, ~] = fileparts(fileNames(f).name);
-
-    %show progress
-    fprintf('Classified: %d/%d. \n', f, size(fileNames,2));
     
+    %only files in given folder
+    if contains(name, '\')
+        continue
+    end
+
+    %show progress    
     disp(name)
     
     %parse filename and rotation
@@ -213,40 +208,51 @@ for f=1:size(fileNames,2)
 
     % Load data
     inputName = [path name];
+    filename = strcat(inputName, '.h5');
 
-    data = HdfImport(inputName);
+    %data = HdfImport(inputName);
     
-    fieldNames = fieldnames(data.MVCenterRotatedVolumes);
+    %fieldNames = fieldnames(data.MVCenterRotatedVolumes);
+
+    infoMVCenterRotatedVolumes = h5info(filename, '/MVCenterRotatedVolumes');
+    rotations = length(infoMVCenterRotatedVolumes.Groups);
     
-    for i = 1 : length(fieldNames)
+    classifiedArray = nan(1, rotations);
+    %referenceArray = nan(1, rotations);
+    twoChamberArray = zeros(1, rotations);
+    fourChamberArray = zeros(1, rotations);
+    alaxArray = zeros(1, rotations);
+    
+    for i = 1 : stepDegree : rotations
         
-        disp(fieldNames{i})
+        fieldName = strcat('rotated_by_', num2str(i-1), '_degrees');
         
-        stringSplit = split(fieldNames{i}, '_');
-        rotationDegree = str2num(stringSplit{3});
+        ds = strcat('/MVCenterRotatedVolumes/', fieldName, '/cardiac_view_probabilities/');
+        try
+            probArray = h5read(filename, ds);
+        catch
+            disp('fuck')
+        end
+        %ds = strcat('/MVCenterRotatedVolumes/', fieldName, '/reference/');
+        %reference = h5read(filename, ds);
         
-        %probability classification array
-        probArray = data.MVCenterRotatedVolumes.(fieldNames{i}).cardiac_view_probabilities;
-        
-        reference = data.MVCenterRotatedVolumes.(fieldNames{i}).reference;
-        
-        fourChamberArray(rotationDegree/10+1) = probArray(1);
-        twoChamberArray(rotationDegree/10+1) = probArray(2);
-        alaxArray(rotationDegree/10+1) = probArray(3);
+        fourChamberArray(i) = probArray(1);
+        twoChamberArray(i) = probArray(2);
+        alaxArray(i) = probArray(3);
         
         [class_conf, class_idx] = max(probArray);
         
-        %
-        if class_conf > 0.5
+        %{
+        if class_conf > 0.45
             classifiedArray(i) = class_idx;
         else
             classifiedArray(i) = 0;
         end
-        %{
-        classifiedArray(i) = class_idx;
         %}
+        classifiedArray(i) = class_idx;
+        %
         
-        referenceArray(i) = reference(1);
+        %referenceArray(i) = reference(1);
         
     end
     
@@ -256,11 +262,85 @@ for f=1:size(fileNames,2)
     
     classifiedStruct.(fileName) = classifiedArray;
     
-    annotatedStruct.(fileName) = referenceArray;
+    %annotatedStruct.(fileName) = referenceArray;
         
 end
 
 
+%% Create struct of classified views by model - 3D data - regression
+folderPath = '/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/test/';
+
+%find all .h5 files
+fileNames = parseDirectoryLinux(folderPath, 1, '.h5');
+
+probArrayReferenceStruct = struct();
+annotatedStruct = struct();
+
+fourChamberReferenceArray = zeros(1, rotations);
+twoChamberReferenceArray = zeros(1, rotations);
+alaxReferenceArray = zeros(1, rotations);
+
+referenceArray = zeros(1, rotations);
+
+%call the split script for each file
+for f=1:size(fileNames,2)
+
+    %root name from h5 file
+    [path, name, ~] = fileparts(fileNames(f).name);
+    
+    disp(name);
+    
+    %only files in given folder
+    if contains(name, '\')
+        continue
+    end
+    
+    %parse filename and rotation
+    stringSplit = split(name, '_');
+    fileName = stringSplit{1};
+    rotation = str2num(stringSplit{4}) + 1;
+
+    % Load data
+    inputName = [path name];
+    filename = strcat(inputName, '.h5');        
+
+    try
+        reference = h5read(filename, '/reference');
+    catch
+        disk('Error. Failed do load data.')
+    end
+    
+    classIdx = 0;
+    
+    if reference(1,1) == 1.0
+       classIdx = 1;
+    elseif reference(2,1) == 1.0
+       classIdx = 2;
+    elseif reference(3,1) == 1.0
+       classIdx = 3;
+    end
+    
+    if classIdx ~= 0
+        for i = (rotation - 10) : stepDegree : (rotation + 10)
+            if i < 1
+                referenceArray(360 + i) = classIdx;
+            else
+                referenceArray(i) = classIdx;
+            end
+        end
+    end
+
+    fourChamberReferenceArray(rotation) = reference(1,1);
+    twoChamberReferenceArray(rotation) = reference(2,1);
+    alaxReferenceArray(rotation) = reference(3,1);
+    
+    probArrayReferenceStruct.(fileName).fourChamber = fourChamberReferenceArray;
+    probArrayReferenceStruct.(fileName).twoChamber = twoChamberReferenceArray;
+    probArrayReferenceStruct.(fileName).alax = alaxReferenceArray;
+    
+    annotatedStruct.(fileName) = referenceArray;
+        
+end
 
 %% Statistics - regression
 fn = fieldnames(classifiedStruct);
@@ -294,9 +374,15 @@ files = fieldnames(probArrayStruct);
 for f = 1 : numel(files)
    
    figure; hold on;
-   plot(probArrayStruct.(files{f}).fourChamber);
-   plot(probArrayStruct.(files{f}).twoChamber);
-   plot(probArrayStruct.(files{f}).alax);
+   
+   plot(probArrayStruct.(files{f}).fourChamber, 'r');
+   plot(probArrayStruct.(files{f}).twoChamber, 'b');
+   plot(probArrayStruct.(files{f}).alax, 'g');
+   
+   plot(probArrayReferenceStruct.(files{f}).fourChamber, 'r--');
+   plot(probArrayReferenceStruct.(files{f}).twoChamber, 'b--');
+   plot(probArrayReferenceStruct.(files{f}).alax, 'g--');
+   
    title(files{f});
-   legend('4C', '2C', 'ALAX');
+   legend('4C', '2C', 'ALAX', '4C reference', '2C reference', 'ALAX reference');
 end

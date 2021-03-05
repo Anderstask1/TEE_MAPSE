@@ -15,7 +15,6 @@ loss_weights = [1.0, 1.0, 1.0, 1.0]
 
 run_loc = 'running_locally'
 model_type = 'CNN'
-label_encoding = 'binary'
 
 if len(sys.argv) > 1:
     run_loc = str(sys.argv[1])
@@ -27,7 +26,7 @@ if len(sys.argv) > 3:
     label_encoding = str(sys.argv[3])
 
 if len(sys.argv) > 4:
-    data_config = str(sys.argv[4])
+    data_config = str(sys.argv[5])
 
 if len(sys.argv) > 5:
     str_weights = sys.argv[5].split(",")
@@ -38,7 +37,7 @@ print(" + Batch size:\t\t\t{}".format(batch_size))
 print(" + Number of epochs:\t\t{}".format(num_epochs))
 print("Location: " + run_loc + "\n")
 print("Model type: " + model_type + "\n")
-print("Binary encoding: " + label_encoding + "\n")
+print("Label encoding: " + label_encoding + "\n")
 print("Data configuration: " + data_config + "\n")
 print("Loss weighting: " + sys.argv[4] + "\n")
 print()
@@ -48,31 +47,21 @@ if run_loc == "running_locally":
     training_info_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/training_info.pth"
     weights_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
 
-    if label_encoding == 'binary':
-        if data_config == 'new':
-            dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/train"
-            dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/binary/val"
-        elif data_config == 'old':
-            dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
-            dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
-
-    elif label_encoding == 'gaussian':
-        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/train"
-        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/gaussian/val"
+    if data_config == 'new':
+        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/" + label_encoding + "/train"
+        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/" + label_encoding + "/val"
+    elif data_config == 'old':
+        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
+        dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/val"
 
 elif run_loc == "running_ssh":
     print("Running the code remotely with ssh")
 
-    if label_encoding == 'binary':
-        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/train_" + data_config
-        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/binary/val_" + data_config
-        training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_binary/training_info.pth"
-        weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_binary/best_weights.pth"
-    elif label_encoding == 'gaussian':
-        dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/train_" + data_config
-        dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/gaussian/val_" + data_config
-        training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_gaussian/training_info.pth"
-        weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_gaussian/best_weights.pth"
+    dataset_train_path = "/home/atasken/Documents/Thesis/3d_data_annotated/" + label_encoding + "/train_" + data_config
+    dataset_val_path = "/home/atasken/Documents/Thesis/3d_data_annotated/" + label_encoding + "/val_" + data_config
+
+    training_info_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_" + model_type + "_" + label_encoding + "/training_info.pth"
+    weights_path = "/home/atasken/Documents/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_" + model_type + "_" + label_encoding + "/best_weights.pth"
 else:
     print("Running the code on Floydhub")
     training_info_path = "/output/training_info.pth"
@@ -110,24 +99,29 @@ if device.type == 'cuda':
 else:
     print("Using cpu for computations")
 
-if model_type == "CNN_classification":
-    model = models.CNN_classification()
-    print("Model architecture: CNN_classification")
-elif model_type == "CNN_regression":
-    model = models.CNN_regression()
-    print("Model architecture: CNN_regression")
+if model_type == "CNN":
+    if label_encoding == "binary":
+        model = models.CNN_classification()
+        print("Model architecture: CNN_classification")
+    elif label_encoding == "gaussian":
+        model = models.CNN_regression()
+        print("Model architecture: CNN_regression")
+
 elif model_type == "VGG16":
-    model = models.VGG16()
-    print("Model architecture: VGG16")
-elif model_type == "VGG16_regression":
-    model = models.VGG16_regression()
-    print("Model architecture: VGG16_regression")
-elif model_type == "ResNext_classification":
-    model = models.ResNext_classification()
-    print("Model architecture: ResNext")
-elif model_type == "ResNext_regression":
-    model = models.ResNext_regression()
-    print("Model architecture: ResNext_regression")
+    if label_encoding == "binary":
+        model = models.VGG16_classification()
+        print("Model architecture: VGG16")
+    elif label_encoding == "gaussian":
+        model = models.VGG16_regression()
+        print("Model architecture: VGG16_regression")
+
+elif model_type == "ResNext_":
+    if label_encoding == "binary":
+        model = models.ResNext_classification()
+        print("Model architecture: ResNext")
+    elif label_encoding == "gaussian":
+        model = models.ResNext_regression()
+        print("Model architecture: ResNext_regression")
 else:
     print("User input don't match a model name. Please input another network architecture name.")
     sys.exit()

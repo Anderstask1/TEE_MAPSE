@@ -87,6 +87,14 @@ for i = 1 : length(filePaths)
     %rotate 3d data
     RotateVolumeYAxis3D(fileNames, startAngleCenter, endAngleCenter, stepDegreeCenter);
     
+     %% Rotate volume around x axis from probe center
+    %rotate 3D ultrasound h5 file in folder along the probe axis
+    %and create slice every degree - save image of rotation
+    disp('Rotate volume around y axis');
+
+    %rotate 3d data
+    RotateVolumeXAxis3D(fileNames, startAngleCenter, endAngleCenter, stepDegreeCenter);
+    
     %% TIME FUNC
     %f = @() RotateVolumeYAxis3D(fileNames, startAngleCenter, endAngleCenter, stepDegreeCenter);
     %timeit(f)
@@ -94,7 +102,7 @@ for i = 1 : length(filePaths)
     %% Save image from first frame of y-axis rotation
     disp('Save image slice from volume rotated around y axis');
 
-    %SaveSliceImageHdf(fileNames, 'RotatedVolumes');
+    SaveSliceImageHdf(fileNames, 'RotatedVolumes');
 
     %% Run python script with DNN model finding MAPSE landmarks in all y-axis rotated
     % slices from volumes in folder

@@ -10,7 +10,7 @@ from preProcessor import PreProcessor
 
 def main():
     # 'CNN_classification' - 'CNN_regression' - 'VGG16_classification' - 'VGG16_regression' - 'ResNext_classification' - 'ResNext_regression'
-    model_name = 'CNN_classification'
+    model_name = 'ResNext_regression'
 
     if len(sys.argv) > 1:
         model_name = str(sys.argv[1])
@@ -27,7 +27,7 @@ def main():
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN_mix/best_weights.pth"
         model = models.CNN_classification()
     if model_name == 'CNN_regression':
-        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN_gaussian_new/best_weights.pth"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_CNN_gaussian_new_1degree/best_weights.pth"
         model = models.CNN_regression()
     elif model_name == 'VGG16_classification':
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
@@ -39,7 +39,7 @@ def main():
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext_new/best_weights.pth"
         model = models.ResNext_classification()
     elif model_name == 'ResNext_regression':
-        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext_new/best_weights.pth"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext_new_1degree/best_weights.pth"
         model = models.ResNext_regression()
     else:
         print('Please set correct model name.')
