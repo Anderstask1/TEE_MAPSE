@@ -26,7 +26,7 @@ if len(sys.argv) > 3:
     label_encoding = str(sys.argv[3])
 
 if len(sys.argv) > 4:
-    data_config = str(sys.argv[5])
+    data_config = str(sys.argv[4])
 
 if len(sys.argv) > 5:
     str_weights = sys.argv[5].split(",")
@@ -48,7 +48,6 @@ if run_loc == "running_locally":
     weights_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_local_training/best_weights.pth"
 
     if data_config == 'new':
-        dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/" + label_encoding + "/train"
         dataset_val_path = "/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/" + label_encoding + "/val"
     elif data_config == 'old':
         dataset_train_path = "/home/anderstask1/Documents/Kyb/Thesis/Trym_data_annotated/train"
