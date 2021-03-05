@@ -29,7 +29,10 @@ if len(sys.argv) > 4:
     data_config = str(sys.argv[4])
 
 if len(sys.argv) > 5:
-    str_weights = sys.argv[5].split(",")
+    cuda_device = str(sys.argv[5])
+
+if len(sys.argv) > 6:
+    str_weights = sys.argv[6].split(",")
     loss_weights = [float(num) for num in str_weights]
 
 print()
@@ -89,9 +92,12 @@ dataloaders = {
     'train':DataLoader(datasets['train'], batch_size=batch_size, shuffle=True, num_workers=4),
     'val':DataLoader(datasets['val'], batch_size=1, shuffle=False, num_workers=4)}
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 if run_loc == "running_locally":
     device = torch.device("cpu")
+elif cuda_device == 'cuda:1':
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+else:
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 if device.type == 'cuda':
     print("Using cuda for gpu-accelerated computations")
