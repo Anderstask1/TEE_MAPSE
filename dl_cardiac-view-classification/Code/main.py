@@ -114,7 +114,7 @@ elif model_type == "VGG16":
         model = models.VGG16_regression()
         print("Model architecture: VGG16_regression")
 
-elif model_type == "ResNext_":
+elif model_type == "ResNext":
     if label_encoding == "binary":
         model = models.ResNext_classification()
         print("Model architecture: ResNext")
