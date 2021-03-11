@@ -42,6 +42,7 @@ print("Location: " + run_loc + "\n")
 print("Model type: " + model_type + "\n")
 print("Label encoding: " + label_encoding + "\n")
 print("Data configuration: " + data_config + "\n")
+print("CUDA device: " + data_config + "\n")
 print("Loss weighting: " + sys.argv[4] + "\n")
 print()
 
@@ -92,7 +93,7 @@ dataloaders = {
     'train':DataLoader(datasets['train'], batch_size=batch_size, shuffle=True, num_workers=4),
     'val':DataLoader(datasets['val'], batch_size=1, shuffle=False, num_workers=4)}
 
-if run_loc == "running_locally":
+if cuda_device == "cuda:cpu":
     device = torch.device("cpu")
 elif cuda_device == 'cuda:1':
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")

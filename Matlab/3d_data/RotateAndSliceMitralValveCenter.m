@@ -42,7 +42,7 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
         boundingBox = imref3d(sz);
         
         info = h5info(filePath);
-        if ~any(strcmp({info.Groups.Name}, '/RotatedVolumes'))
+        if ~any(strcmp({info.Groups.Name}, '/RotatedXVolumes'))
             fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
             continue
         end
@@ -53,7 +53,7 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
             fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
             continue
         end
-        %}
+        %
         
         %load optMapseAngles
         filename = strcat(path, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');
@@ -71,7 +71,7 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
         %get landmark coordinates
         %mapseLandmarks = hdfdata.RotatedVolumes.(fieldName).MAPSE_detected_landmarks';
         
-        ds = strcat('/RotatedVolumes/', fieldName, '/MAPSE_detected_landmarks')
+        ds = strcat('/RotatedYVolumes/', fieldName, '/MAPSE_detected_landmarks');
         mapseLandmarks = h5read(filePath, ds)';
 
         %stop iteration if no landmark at specified angle
@@ -79,10 +79,11 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
             disp('No MAPSE landmarks detected at given angle, so cannot find MV center.');
             continue 
         end
+        %}
         
         %load rotation matrix
-        trfFileName = strcat(path,'Transformation-matrices_y-axis/', name, '/rotateM_y_y-axis-rotated_by_', int2str(optMapseAngle),'_degrees.mat');
-        rotateM_y = load(trfFileName, 'rotateM_y').rotateM_y;
+        %trfFileName = strcat(path,'Transformation-matrices_y-axis/', name, '/rotateM_y_y-axis-rotated_by_', int2str(optMapseAngle),'_degrees.mat');
+        %rotateM_y = load(trfFileName, 'rotateM_y').rotateM_y;
         
         %translate origin to probe center
         translateM_probeCenter = [
@@ -91,8 +92,10 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
               0 0 1 0
               0 0 0 1
             ];
+        %
          
-        %% Transformation computation    
+        %% Transformation computation   
+        %{
         %compute x coordinate value
         x = sz(1)/2;
 
@@ -105,8 +108,37 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
         mvCenter3D_trf = [(mapseLeft3D_trf(1) + mapseRight3D_trf(1))/2; (mapseLeft3D_trf(2) + mapseRight3D_trf(2))/2; (mapseLeft3D_trf(3) + mapseRight3D_trf(3))/2; 1];
         
         mvCenter3D = translateM_probeCenter \ mvCenter3D_trf;
+        %}
         
-        alpha = atan(mvCenter3D(2)/mvCenter3D(3));
+        %load intersection point
+        trfFileName = strcat(path,'LandmarkMatricesVariables/', name, '/intersection-point.mat');
+        intersectionPoint = load(trfFileName,'intersectionPoint').intersectionPoint;
+        
+        translateM_intersection = [
+              1 0 0 intersectionPoint(1)
+              0 1 0 intersectionPoint(2)
+              0 0 1 intersectionPoint(3)
+              0 0 0 1
+            ];
+        
+        %load mv center estimation
+        trfFileName = strcat(path,'LandmarkMatricesVariables/', name, '/mv-center-estimate.mat');
+        mvCenter3D_trf = load(trfFileName, 'mvCenter3D').mvCenter3D;
+        
+        mvCenter3D = translateM_intersection \ mvCenter3D_trf;
+        
+        theta = -atan(mvCenter3D(1)/mvCenter3D(3));
+        
+        rotateM_y = [
+             cos(theta)  0  sin(theta)  0
+             0           1  0           0
+             -sin(theta) 0  cos(theta)  0  
+             0           0  0           1
+             ];
+        
+        mv_xyplane = rotateM_y * mvCenter3D;
+         
+        alpha = atan(mv_xyplane(2)/mv_xyplane(3));
         
         rotateM_x = [
             1  0           0           0
@@ -114,7 +146,7 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
             0  sin(alpha)  cos(alpha)  0  
             0  0           0           1
             ];
-
+        
         %rotate 360 degrees around mv center
         for angle = startAngle : stepDegree : endAngle
 
@@ -131,7 +163,8 @@ function RotateAndSliceMitralValveCenter(fileNames, startAngle, endAngle, stepDe
                  0           0            0 1
                  ];
 
-            mv_trf = (translateM_probeCenter * rotateM_z * rotateM_x * rotateM_y) / translateM_probeCenter;
+            %mv_trf = (translateM_probeCenter * rotateM_z * rotateM_x * rotateM_y) / translateM_probeCenter;
+            mv_trf = (translateM_intersection * rotateM_z * rotateM_x * rotateM_y) / translateM_intersection;
 
             %transform volume +
             mv_tform = affine3d(mv_trf');

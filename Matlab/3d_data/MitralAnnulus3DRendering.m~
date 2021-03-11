@@ -7,9 +7,6 @@ function MitralAnnulus3DRendering(fileNames, cardiac_view)
     for f=1:size(fileNames,2)
         %root name from h5 file
         [filesPath, name, ~] = fileparts(fileNames(f).name);
-        
-        %% Frame used to render single annnulus plot
-        frame = 1;
 
         %% Load data   
         %show progress
@@ -75,12 +72,11 @@ function MitralAnnulus3DRendering(fileNames, cardiac_view)
         %get image from first frame in sequence, remove dimension of length 1
         sliceX = squeeze(volumeData(round(volumeSize(2)/2),:,:))';
         
-        xRotImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
-        yRotImage = [0 volumeSize(2); 0 volumeSize(2)]; % The y data for the image corners
-        zRotImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
-        
         %get image from first frame in sequence, remove dimension of length 1
         sliceY = squeeze(volumeData(:,round(volumeSize(1)/2),:))';
+        
+         %% Frame used to render single annnulus plot
+        frame = 1;
 
         %% Use 3d coordinates of right and left mv landmark for 180 degrees rotation to construct 3d render of Mitral Annulus
 
@@ -107,12 +103,18 @@ function MitralAnnulus3DRendering(fileNames, cardiac_view)
         landmark3DMatrix = load(trfFileName,'landmark3DMatrix').landmark3DMatrix;
         
         %----------- add to 2d perpendicular slices to the volume ---------
+        xImage = [0 volumeSize(1); 0 volumeSize(1)];   % The x data for the image corners
+        yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
         surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',sliceX,...
          'FaceColor','texturemap'); hold on
         colormap('gray');
 
-        surf(xRotImage,yRotImage,zRotImage,...    % Plot the surface
+        xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
+        yImage = [0 volumeSize(2); 0 volumeSize(2)]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
+        surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',sliceY,...
          'FaceColor','texturemap');
         colormap('gray');
@@ -143,7 +145,7 @@ function MitralAnnulus3DRendering(fileNames, cardiac_view)
         %save figure
         scatterFigName = strcat(directoryPath, name,'_frame_', int2str(frame),'_scatterfig_xy_rotation.fig');
         savefig(scatterFig, scatterFigName)
-        %{
+        %
         
         %% Scatterplot of landmarks and rejected landmarks
         scatterFig = figure('visible','off');
@@ -183,7 +185,7 @@ function MitralAnnulus3DRendering(fileNames, cardiac_view)
          'FaceColor','texturemap'); hold on
         colormap('gray');
 
-        surf(xRotImage,yRotImage,zRotImage,...    % Plot the surface
+        surf(xIxRotImagemage,yRotImage,zRotImage,...    % Plot the surface
          'CData',sliceY,...
          'FaceColor','texturemap');
         colormap('gray');
@@ -220,12 +222,19 @@ function MitralAnnulus3DRendering(fileNames, cardiac_view)
         interpFigure = figure('visible','off');
         
         %----------- add to 2d perpendicular slices to the volume ---------
+
+        xImage = [0 volumeSize(1); 0 volumeSize(1)];   % The x data for the image corners
+        yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
         surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',sliceX,...
          'FaceColor','texturemap'); hold on
         colormap('gray');
-        
-        surf(xRotImage,yRotImage,zRotImage,...    % Plot the surface
+
+        xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
+        yImage = [0 volumeSize(2); 0 volumeSize(2)]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
+        surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',sliceY,...
          'FaceColor','texturemap');
         colormap('gray');
@@ -268,12 +277,19 @@ function MitralAnnulus3DRendering(fileNames, cardiac_view)
         interpFig = figure('visible','off');
         
         %----------- add to 2d perpendicular slices to the volume ---------
+
+        xImage = [0 volumeSize(1);0 volumeSize(1)];   % The x data for the image corners
+        yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
         surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',sliceX,...
          'FaceColor','texturemap'); hold on
         colormap('gray');
 
-        surf(xRotImage,yRotImage,zRotImage,...    % Plot the surface
+        xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
+        yImage = [0 volumeSize(2);0 volumeSize(2)]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
+        surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',sliceY,...
          'FaceColor','texturemap');
         colormap('gray');
@@ -315,12 +331,19 @@ function MitralAnnulus3DRendering(fileNames, cardiac_view)
         meanFig = figure('visible','off');
         
         %----------- add to 2d perpendicular slices to the volume ---------
+
+        xImage = [0 volumeSize(1);0 volumeSize(1)];   % The x data for the image corners
+        yImage = [volumeSize(2)/2 volumeSize(2)/2; volumeSize(2)/2 volumeSize(2)/2]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
         surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',sliceX,...
          'FaceColor','texturemap'); hold on
         colormap('gray');
 
-        surf(xRotImage,yRotImage, zRotImage,...    % Plot the surface
+        xImage = [volumeSize(1)/2 volumeSize(1)/2; volumeSize(1)/2 volumeSize(1)/2];   % The x data for the image corners
+        yImage = [0 volumeSize(2);0 volumeSize(2)]; % The y data for the image corners
+        zImage = [0 0; volumeSize(3) volumeSize(3)];   % The z data for the image corners
+        surf(xImage,yImage,zImage,...    % Plot the surface
          'CData',sliceY,...
          'FaceColor','texturemap');
         colormap('gray');

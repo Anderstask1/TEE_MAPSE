@@ -61,7 +61,7 @@ function RotateVolumeXAxis3D(fileNames, startAngle, endAngle, stepDegree)
             tform = affine3d(trf');
 
             %create folder for transformation matrices
-            directoryPath = strcat(path, '/Transformation-matrices_y-axis/');
+            directoryPath = strcat(path, '/Transformation-matrices_x-axis/');
             if ~exist(directoryPath, 'dir')
                 % Folder does not exist so create it.
                 mkdir(directoryPath);
@@ -126,7 +126,7 @@ function RotateVolumeXAxis3D(fileNames, startAngle, endAngle, stepDegree)
             %}
             filename = strcat(inputName, '.h5');
             fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
-            ds = strcat('/RotatedVolumes/', fieldName, '/images');
+            ds = strcat('/RotatedXVolumes/', fieldName, '/images');
             
             try
                 h5create(filename, ds, size(slices));

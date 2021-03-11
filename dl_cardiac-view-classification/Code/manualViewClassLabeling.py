@@ -24,7 +24,6 @@ def main():
     plt.ion()
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--data-path')
-    args = parser.parse_args()
 
     root_dir = "/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotating"
 
@@ -76,8 +75,6 @@ def main():
             rotated_field = rotated_fields[idx]
             tissue = np.array(f_read_write['MVCenterRotatedVolumes'][rotated_field]['images'])
 
-            imgs = np.empty(shape=(0,tissue.shape[1],tissue.shape[2]))
-
             print(rotated_field)
             print("\n")
 
@@ -95,20 +92,44 @@ def main():
                 # get the hdf key
                 h5_keys = f_read_write['ClassAnnotations'].keys()
 
-                # create group in hdf5 file for annotations
-                if rotated_field in h5_keys:
-                    del f_read_write['ClassAnnotations'][rotated_field]
-                f_read_write['ClassAnnotations'].create_group(rotated_field)
+                if user_input == "1":
+                    four_chamber_field = rotated_field
+                    two_chamber_field = rotated_fields[(idx + 6) % 36]
+                    alax_field = rotated_fields[(idx + 12) % 36]
+                elif user_input == "2":
+                    four_chamber_field = rotated_fields[(idx - 6) % 36]
+                    two_chamber_field = rotated_field
+                    alax_field = rotated_fields[(idx + 6) % 36]
+                elif user_input == "3":
+                    four_chamber_field = rotated_fields[(idx - 12) % 36]
+                    two_chamber_field = rotated_fields[(idx - 6) % 36]
+                    alax_field = rotated_field
 
+                annotate_fields = [four_chamber_field, two_chamber_field, alax_field]
+
+                for idx, annotate_field in enumerate(annotate_fields):
+                    # create group in hdf5 file for annotations
+                    if annotate_field in h5_keys:
+                        del f_read_write['ClassAnnotations'][annotate_field]
+                    f_read_write['ClassAnnotations'].create_group(annotate_field)
+
+                    # get the hdf keys
+                    h5_keys = f_read_write['ClassAnnotations'][annotate_field].keys()
+
+                    if 'reference' in h5_keys:
+                        del f_read_write['ClassAnnotations'][annotate_field]['reference']
+                    f_read_write['ClassAnnotations'][annotate_field].create_dataset('reference', data=idx+1)
+
+                    print("Annotated ", annotate_field, " as ", idx + 1, ". \n")
+
+                print("Saving and closing file\n")
+                break
+            elif user_input == "delete":
                 # get the hdf keys
                 h5_keys = f_read_write['ClassAnnotations'][rotated_field].keys()
 
                 if 'reference' in h5_keys:
                     del f_read_write['ClassAnnotations'][rotated_field]['reference']
-                f_read_write['ClassAnnotations'][rotated_field].create_dataset('reference', data=user_input)
-
-                print("Annotated ", rotated_field, " as ", user_input, ". \n")
-
             elif user_input == "c":
                 print("Saving and closing file\n")
                 break

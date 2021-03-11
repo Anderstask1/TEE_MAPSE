@@ -14,24 +14,15 @@ function MitralValveAreaComputation(fileNames, cardiac_view)
         %load data
         fileName = strcat(name,'.h5'); 
         filePath = strcat(filesPath, fileName);
-        hdfdata = HdfImport(filePath);
+        %hdfdata = HdfImport(filePath);
         
-        %default voxelsize value
-        pixelCorr = 0.7e-3;
-
-        %check if voxeldize is in hdfdata
-        if any(strcmp(fieldnames(hdfdata),'a'))
-            pixelCorr = hdfdata.ImageGeometry.voxelsize;
-        end
-
-        %load optMapseAngles
-        filename = strcat(filesPath, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');
-        optMapseAngle = load(filename, 'optMapseAngle').optMapseAngle;
-
-        %skip iteration if optimal angle is 0 (most likely due to no landmarks)
-        if optMapseAngle == 0
-            fprintf('Optimal mapse angle is 0, skipping iteration with file %s \n', name);
-            continue
+        try 
+            ds = strcat('/ImageGeometry/voxelsize');
+            pixelCorr = h5read(filePath, ds);
+        catch
+            %default voxelsize value
+            pixelCorr = 0.7e-3;
+            fprintf('Failed to read pixelCorr for file %s', name);
         end
         
         % Load landmark variable matrices
@@ -44,12 +35,15 @@ function MitralValveAreaComputation(fileNames, cardiac_view)
             'rejectedLandmarkLeft3DMatrix', 'rejectedLandmarkRight3DMatrix', ...
             'landmarkMean3DMatrix', 'meanSplineCurve', 'meanBezierCurve');
 
+        %load landmark matrix for x and y rot
+        trfFileName = strcat(filesPath,'LandmarkMatricesVariables/', name, '/landmark3DMatrix.mat');
         
         for frame = 1 : size(landmarkLeft3DMatrix, 3)
             %landmark3DMatrix = landmarkRight3DMatrix(:,:,frame);
-            landmark3DMatrix = permute(leftLandmarkBezierCurve(:, :, frame), [2 1 3]);
+            landmark3DMatrix = load(trfFileName,'landmark3DMatrix').landmark3DMatrix;
+            %landmark3DMatrix = permute(leftLandmarkBezierCurve(:, :, frame), [2 1 3]);
             landmark3DMatrix = landmark3DMatrix(:,~isnan(landmark3DMatrix(1,:)));            
-            landmark3DMatrix = landmark3DMatrix .* (pixelCorr); %in millimeters
+            landmark3DMatrix = landmark3DMatrix .* (pixelCorr*10); %in cm
 
             %plot surface of valve
             %p_h=plot3(landmark3DMatrix(1,:),landmark3DMatrix(2,:),landmark3DMatrix(3,:),'o'); hold on
@@ -65,7 +59,7 @@ function MitralValveAreaComputation(fileNames, cardiac_view)
             c = cross(a, b, 2);
             area = 1/2 * sum(sqrt(sum(c.^2, 2)));
             
-            fprintf('Area of MV is: %0.2f cm². \n', area*100); % mm² to cm²
+            fprintf('Area of MV is: %0.2f cm². \n', area);
             %
         end
     end

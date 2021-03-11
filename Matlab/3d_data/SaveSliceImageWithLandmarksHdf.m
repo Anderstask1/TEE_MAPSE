@@ -1,7 +1,7 @@
 %Save slice as image
 %Author: Anders Tasken
 %Started 05.10.2020
-function SaveSliceImageWithLandmarksHdf(fileNames, fieldName)
+function SaveSliceImageWithLandmarksHdf(fileNames, fieldName, startAngle, endAngle, stepDegree)
 
     %set colors
     blueColor = [0, 0.4470, 0.7410];
@@ -18,10 +18,8 @@ function SaveSliceImageWithLandmarksHdf(fileNames, fieldName)
         fprintf('Save image with landmarks from file with name: %s. \n', name);
 
         %% Load data
-        inputName = [path name];
-
-        %load data
-        hdfdata = HdfImport(inputName);
+        fileName = strcat(name,'.h5'); 
+        filePath = strcat(path, fileName);
 
         %create folder for images
         directoryPath = strcat(path, 'PostProcessMapseImages_', fieldName, '/');
@@ -37,6 +35,7 @@ function SaveSliceImageWithLandmarksHdf(fileNames, fieldName)
             mkdir(directoryPath);
         end
         
+        %{
         optMapseAngle = -1;
         if strcmp(fieldName, 'MVCenterRotatedVolumes')
             %load optMapseAngles
@@ -49,20 +48,22 @@ function SaveSliceImageWithLandmarksHdf(fileNames, fieldName)
             fprintf('Optimal mapse angle is 0, skipping iteration with file %s \n', name);
             continue
         end
+        %}
         
-        %get all fields from data struct
-        fields = fieldnames(hdfdata.(fieldName));
 
-        %iterate over all fields
-        for i = 1 : numel(fields)
-
+        for angle = startAngle : stepDegree : endAngle
+            
             %get field data
-            fieldData = hdfdata.(fieldName).(fields{i}).images;
+            fn = strcat('rotated_by_', int2str(angle),'_degrees');
+            ds = strcat('/', fieldName, '/', fn, '/images');
+            fieldData =  h5read(filePath, ds);
 
             %get mapse landmarks coordinates, left landmark: x-y, right landmark
             %x-y, for all frames
-            mapseLandmarks = hdfdata.(fieldName).(fields{i}).MAPSE_detected_landmarks';
+            ds = strcat('/', fieldName, '/', fn, '/MAPSE_detected_landmarks');
+            mapseLandmarks =  h5read(filePath, ds)';
             
+            %{
             %get annotated landmarks, if any
             isAnnotatedData = any(strcmp(fieldnames(hdfdata),'Annotations')) && strcmp(fieldName, 'MVCenterRotatedVolumes');
             annotatedLandmarks = zeros(size(mapseLandmarks));
@@ -70,6 +71,7 @@ function SaveSliceImageWithLandmarksHdf(fileNames, fieldName)
             if isAnnotatedData
                 annotatedLandmarks = hdfdata.Annotations.(fields{i}).ref_coord';
             end
+            %}
 
             %get image from first frame in sequence, remove dimension of length 1
             slice = squeeze(fieldData(:,:,1)');
@@ -88,6 +90,7 @@ function SaveSliceImageWithLandmarksHdf(fileNames, fieldName)
                 plot(mapseLandmarks(1,3), mapseLandmarks(1,4), 'x', 'LineWidth', 2, 'Color', orangeColor);
             end
             
+            %{
             %plot annotated landmarks, if any
             if isAnnotatedData
                 if ~isnan(annotatedLandmarks(1,1))
@@ -97,11 +100,12 @@ function SaveSliceImageWithLandmarksHdf(fileNames, fieldName)
                     plot(annotatedLandmarks(1,4), annotatedLandmarks(1,3), 'o', 'LineWidth', 1, 'Color', greenColor);
                 end
             end
+            %}
 
             hold off
 
             %save image
-            fileName = strcat(directoryPath, name,'_',string(fields(i)),'.png');
+            fileName = strcat(directoryPath, name,'_',string(angle),'.png');
             saveas(fig, fileName);
         end
     end

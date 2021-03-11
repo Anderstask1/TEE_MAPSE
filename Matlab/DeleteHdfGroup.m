@@ -1,7 +1,7 @@
 %delete specified group and correponding dataset in hdf5 files
 %Started 2.03.2021, Anders Tasken 
     
-filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/';
+filesPath = '/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotated/';
 
 %find all .h5 files
 fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
@@ -19,9 +19,9 @@ for f=1:size(fileNames,2)
 
     data = HdfImport(inputName);
 
-    if isfield(data, 'MVCenterRotatedVolumes')
+    if isfield(data, 'ClassAnnotations')
 
-        data = rmfield(data, 'MVCenterRotatedVolumes');
+        data = rmfield(data, 'ClassAnnotations');
 
         %new filename
         outName = strcat(inputName,'.h5');

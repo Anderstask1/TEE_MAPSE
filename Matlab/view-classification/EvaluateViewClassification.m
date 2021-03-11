@@ -39,7 +39,7 @@ for f=1:size(fileNames,2)
     
     if annotatedClass == classifiedClass
         true = true + 1;
-    elsehttps://media-exp1.licdn.com/dms/image/C4E03AQGV9b8eWaYwAg/profile-displayphoto-shrink_400_400/0/1601755823867?e=1620259200&v=beta&t=eDbM_SYOQH4NJF9hfSpsbtYRuwQf9TtU43cjo1k7KxA
+    else
         false = false + 1;
     end
 
@@ -177,12 +177,13 @@ end
 
 %% Create struct of classified views by model - 3D data - regression
 folderPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/';
+folderPath = '/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotated/';
+
+%degree of rotation between each 2d image
+stepDegree = 10;
 
 %find all .h5 files
 fileNames = parseDirectoryLinux(folderPath, 1, '.h5');
-
-%degree of rotation between each 2d image
-stepDegree = 1;
 
 classifiedStruct = struct();
 %annotatedStruct = struct();
@@ -242,15 +243,15 @@ for f=1:size(fileNames,2)
         
         [class_conf, class_idx] = max(probArray);
         
-        %{
-        if class_conf > 0.45
+        %
+        if class_conf > 0.4
             classifiedArray(i) = class_idx;
         else
             classifiedArray(i) = 0;
         end
-        %}
+        %{
         classifiedArray(i) = class_idx;
-        %
+        %}
         
         %referenceArray(i) = reference(1);
         
@@ -269,7 +270,6 @@ end
 
 %% Create struct of classified views by model - 3D data - regression
 folderPath = '/home/anderstask1/Documents/Kyb/Thesis/3d_data_annotated/test/';
-
 %find all .h5 files
 fileNames = parseDirectoryLinux(folderPath, 1, '.h5');
 
@@ -351,15 +351,15 @@ noise = 0;
 
 for i = 1 : numel(fn)
     for j = 1 : length(annotatedStruct.(fn{i}))
-        if  ~annotatedStruct.(fn{i})(j) == 0
+        %if  ~annotatedStruct.(fn{i})(j) == 0
             if annotatedStruct.(fn{i})(j) == classifiedStruct.(fn{i})(j)
                 true = true + 1;
             else 
                 false = false + 1;
             end
-        else
-            noise = noise + 1;
-        end
+        %else
+            %noise = noise + 1;
+        %end
     end
 end
 

@@ -7,6 +7,7 @@ function MitralAnnulus3DPlot(fileNames, plotnames)
             %root name from h5 file
             [path, name, ~] = fileparts(fileNames(f).name);
             
+            %{
             %load optMapseAngles
             filename = strcat(path, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');
             optMapseAngle = load(filename, 'optMapseAngle').optMapseAngle;
@@ -16,6 +17,7 @@ function MitralAnnulus3DPlot(fileNames, plotnames)
                 fprintf('Optimal mapse angle is 0, skipping iteration with file %s \n', name);
                 continue
             end
+            %}
             
             figname = strcat(path, 'PostProcessMVAnnulusFigures/', name, '/', name, plotnames{i}, '.fig');
             openfig(figname, 'visible');

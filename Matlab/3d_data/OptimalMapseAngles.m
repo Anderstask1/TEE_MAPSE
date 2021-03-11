@@ -3,7 +3,7 @@
 %landmarks is biggest
 %Author: Anders Tasken
 %Started 07.10.2020
-function OptimalMapseAngles(fileNames, filesPath)
+function OptimalMapseAngles(fileNames, filesPath, startAngle, endAngle, stepDegree)
 
     %for each file
     for f=1:size(fileNames,2)
@@ -19,28 +19,21 @@ function OptimalMapseAngles(fileNames, filesPath)
         %highest found distance
         bestDistance = 0;
 
-        inputName = [path name];
-
-        %load data
-        hdfdata = HdfImport(inputName);
+        fileName = strcat(name,'.h5'); 
+        filePath = strcat(path, fileName);
         
-        %check if volume is rotated
-        if ~any(strcmp(fieldnames(hdfdata),'RotatedVolumes'))
+        info = h5info(filePath);
+        if ~any(strcmp({info.Groups.Name}, '/RotatedXVolumes'))
             fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
             continue
         end
 
-        %get all fields from data struct
-        fields = fieldnames(hdfdata.RotatedVolumes);
-
-        %number of frames
-        frameNo = length(fieldnames(hdfdata.RotatedVolumes));
-
         %iterate over all rotations
-        for i = 1:frameNo
-            %get field data. left landmark (x,y) - right landmark (x,y)
-            %all frames, only interested in first frame = first row
-            mapseLandmarks = hdfdata.RotatedVolumes.(fields{i}).MAPSE_detected_landmarks';
+        for angle = startAngle : stepDegree : endAngle
+            
+            fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
+            ds = strcat('/RotatedYVolumes/', fieldName, '/MAPSE_detected_landmarks');
+            mapseLandmarks = h5read(filePath, ds)';
 
             %need both left and right landmark
             if ~isnan(mapseLandmarks(1,:))
@@ -56,7 +49,6 @@ function OptimalMapseAngles(fileNames, filesPath)
                     bestDistance = distance;
 
                     %save angle -parsing from fieldName
-                    fieldName = fields{i};
                     angleCell = regexp(fieldName,'\d*','Match');
                     angleString = angleCell{1};
                     optMapseAngle = str2num(angleString);
@@ -85,5 +77,4 @@ function OptimalMapseAngles(fileNames, filesPath)
         save(filename, 'optMapseAngle');
         
     end
-    
 end

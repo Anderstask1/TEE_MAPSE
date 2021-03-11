@@ -24,9 +24,15 @@ function RotateVolumeYAxis3D(fileNames, startAngle, endAngle, stepDegree)
 
         %volumetric data
         %vol1 = data.CartesianVolumes.vol01;
-        vol1 = h5read(filename, '/CartesianVolumes/vol01');
-        vol2 = h5read(filename, '/CartesianVolumes/vol02');
-        vol3 = h5read(filename, '/CartesianVolumes/vol03');
+        try
+            vol1 = h5read(filename, '/CartesianVolumes/vol01');
+            vol2 = h5read(filename, '/CartesianVolumes/vol02');
+            vol3 = h5read(filename, '/CartesianVolumes/vol03');
+        catch
+            fprintf('File %s do not have enough frames', name)
+            continue
+        end
+        
         boundingBox = imref3d(size(vol1));
         sz =size(vol1);
 
@@ -126,7 +132,7 @@ function RotateVolumeYAxis3D(fileNames, startAngle, endAngle, stepDegree)
             %}
             filename = strcat(inputName, '.h5');
             fieldName = strcat('rotated_by_', int2str(angle),'_degrees');
-            ds = strcat('/RotatedVolumes/', fieldName, '/images');
+            ds = strcat('/RotatedYVolumes/', fieldName, '/images');
             
             try
                 h5create(filename, ds, size(slices));

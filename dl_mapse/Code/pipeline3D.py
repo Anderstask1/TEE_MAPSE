@@ -121,8 +121,8 @@ def main():
     # Only use first input argument (second element, after pipeline3d.py)
     if len(sys.argv) > 1:
         user_input = str(sys.argv[1])
-        if user_input == "RotatedVolumes" or user_input == "MVCenterRotatedVolumes":
-            field_name = user_input
+        #if user_input == "RotatedVolumes" or user_input == "MVCenterRotatedVolumes":
+        field_name = user_input
 
     # User input file path (in order to mach matlab script from command line)
     if len(sys.argv) > 2:

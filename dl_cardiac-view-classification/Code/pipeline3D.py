@@ -10,7 +10,7 @@ from preProcessor import PreProcessor
 
 def main():
     # 'CNN_classification' - 'CNN_regression' - 'VGG16_classification' - 'VGG16_regression' - 'ResNext_classification' - 'ResNext_regression'
-    model_name = 'ResNext_regression'
+    model_name = 'CNN_regression'
 
     if len(sys.argv) > 1:
         model_name = str(sys.argv[1])
@@ -19,7 +19,8 @@ def main():
     device = torch.device("cpu")
 
     # folder path to US data
-    file_dir = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData'
+    #file_dir = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData'
+    file_dir = '/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotated/'
 
     # model weights from different training data - from floydhub
     # load the model
@@ -33,7 +34,7 @@ def main():
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
         model = models.VGG16_classification()
     elif model_name == 'VGG16_regression':
-        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16/best_weights.pth"
+        model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_VGG16_new_1degree/best_weights.pth"
         model = models.VGG16_regression()
     elif model_name == 'ResNext_classification':
         model_path = "/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Data_ResNext_new/best_weights.pth"

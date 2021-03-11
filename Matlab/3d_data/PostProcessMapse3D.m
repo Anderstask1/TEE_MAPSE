@@ -45,8 +45,9 @@ function PostProcessMapse3D(fileNames, cardiac_view)
         %load data
         fileName = strcat(name,'.h5'); 
         filePath = strcat(path, fileName);
-        hdfdata = HdfImport(filePath);
+        %hdfdata = HdfImport(filePath);
         
+        %{
         %load optMapseAngles
         filename = strcat(path, 'Optimal_angle_mv-center-computation/', name, '/optMapseAngle.mat');
         optMapseAngle = load(filename, 'optMapseAngle').optMapseAngle;
@@ -56,18 +57,26 @@ function PostProcessMapse3D(fileNames, cardiac_view)
             fprintf('Optimal mapse angle is 0, skipping iteration with file %s \n', name);
             continue
         end
+        %}
 
         %number of frames
-        frameNo = length(fieldnames(hdfdata.CartesianVolumes));
-
-        %default voxelsize value
-        pixelCorr = 0.7e-3;
+        %frameNo = length(fieldnames(hdfdata.CartesianVolumes));
+        infoCartesianVolumes = h5info(filePath, '/CartesianVolumes');
+        frameNo = length(infoCartesianVolumes.Datasets);
 
         %check if voxeldize is in hdfdata
-        if any(strcmp(fieldnames(hdfdata),'a'))
-            pixelCorr = hdfdata.ImageGeometry.voxelsize;
+        %if any(strcmp(fieldnames(hdfdata),'a'))
+            %pixelCorr = hdfdata.ImageGeometry.voxelsize;
+        %end
+        try 
+            ds = strcat('/ImageGeometry/voxelsize');
+            pixelCorr = h5read(filePath, ds);
+        catch
+            %default voxelsize value
+            pixelCorr = 0.7e-3;
+            fprintf('Failed to read pixelCorr for file %s', name);
         end
-
+        
         %% Load landmark variables
         variablesFilename = strcat(path, 'LandmarkMatricesVariables/landmarkMatrices_', cardiac_view, '_', name);
         load(variablesFilename,...

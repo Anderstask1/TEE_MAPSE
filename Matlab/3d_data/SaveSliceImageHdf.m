@@ -1,7 +1,7 @@
 %Plot sliced 2d TEE data from hdf-file, only 1 image per sequence
 %Started 04.09.2020
 %Author: Anders Tasken
-function SaveSliceImageHdf(fileNames, fieldName)
+function SaveSliceImageHdf(fileNames, fieldName, startAngle, endAngle, stepDegree)
 
     %call the split script for each file
     for f=1:size(fileNames,2)
@@ -11,10 +11,9 @@ function SaveSliceImageHdf(fileNames, fieldName)
         %show progress
         fprintf('Extracting slices from file with name: %s. \n', name);
 
-        inputName = [path name];
-
         %load data
-        data = HdfImport(inputName);
+        fileName = strcat(name,'.h5'); 
+        filePath = strcat(path, fileName);
 
         %create folder for images
         %directoryPath = strcat(filesPath, '/SlicedImages_MVCenter_', name, '/');
@@ -32,12 +31,15 @@ function SaveSliceImageHdf(fileNames, fieldName)
             mkdir(directoryPath);
         end
         
+        %{
         %check if volume is rotated
-        if ~any(strcmp(fieldnames(data),'RotatedVolumes'))
+        info = h5info(filePath);
+        if ~any(strcmp({info.Groups.Name}, '/RotatedXVolumes'))
             fprintf('Skipping iteration with file %s, since volume not rotated. \n', name);
             continue
         end
         
+        %
         optMapseAngle = -1;
         
         if strcmp(fieldName, 'MVCenterRotatedVolumes')
@@ -51,21 +53,21 @@ function SaveSliceImageHdf(fileNames, fieldName)
             fprintf('Optimal mapse angle is 0, skipping iteration with file %s \n', name);
             continue
         end
+        %}
 
-        %get all fields from data struct
-        fields = fieldnames(data.(fieldName));
-
-        %iterate over all fields
-        for i = 1 : numel(fields)
-
+        % Rotate given degrees
+        for angle = startAngle : stepDegree : endAngle
+        
             %get field data
-            fieldData = data.(fieldName).(fields{i}).images;
+            fn = strcat('rotated_by_', int2str(angle),'_degrees');
+            ds = strcat('/', fieldName, '/', fn, '/images');
+            fieldData =  h5read(filePath, ds);
 
             %get image, remove dimension of length 1
             slice = squeeze(fieldData(:,:,1));
 
             %save image
-            fileName = strcat(directoryPath,name,'_',string(fields(i)),'.png');
+            fileName = strcat(directoryPath, name, '_', string(angle), '.png');
             imwrite(slice, gray, fileName);
 
         end

@@ -15,6 +15,7 @@ addpath('Bezier')
 addpath('3d_data/ShadedPlot')
 addpath('3d_data/thrynae-BlandAltmanPlot-bf89c89')
 addpath('surface_area')
+addpath('view-classification')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -40,6 +41,7 @@ for i = 1 : length(filePaths)
     modelPath = strcat('/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Data/best_true_weights_Mapse_new.pth');
     
     filesPath = '/home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/CurrentClassifyingData/';
+    filesPath = '/home/anderstask1/Documents/Kyb/Thesis/Annotate_rotated_3d_ultrasound_data/Annotated/';
 
     %find all .h5 files
     fileNames = parseDirectoryLinux(filesPath, 1, '.h5');
@@ -47,8 +49,8 @@ for i = 1 : length(filePaths)
     %% Hyperparameters
 
     %Rotate volume from start-angle to end-angle with degree step
-    startAngleCenter = 80;
-    endAngleCenter = 100;
+    startAngleCenter = 60;
+    endAngleCenter = 120;
     stepDegreeCenter = 1;
 
     %Rotate volume from start-angle to end-angle with degree step
@@ -90,7 +92,7 @@ for i = 1 : length(filePaths)
      %% Rotate volume around x axis from probe center
     %rotate 3D ultrasound h5 file in folder along the probe axis
     %and create slice every degree - save image of rotation
-    disp('Rotate volume around y axis');
+    disp('Rotate volume around x axis');
 
     %rotate 3d data
     RotateVolumeXAxis3D(fileNames, startAngleCenter, endAngleCenter, stepDegreeCenter);
@@ -99,10 +101,11 @@ for i = 1 : length(filePaths)
     %f = @() RotateVolumeYAxis3D(fileNames, startAngleCenter, endAngleCenter, stepDegreeCenter);
     %timeit(f)
 
-    %% Save image from first frame of y-axis rotation
+    %% Save image from first frame of xy-axis rotation
     disp('Save image slice from volume rotated around y axis');
 
-    SaveSliceImageHdf(fileNames, 'RotatedVolumes');
+    SaveSliceImageHdf(fileNames, 'RotatedYVolumes', startAngleCenter, endAngleCenter, stepDegreeCenter);
+    SaveSliceImageHdf(fileNames, 'RotatedXVolumes', startAngleCenter, endAngleCenter, stepDegreeCenter);
 
     %% Run python script with DNN model finding MAPSE landmarks in all y-axis rotated
     % slices from volumes in folder
@@ -112,18 +115,34 @@ for i = 1 : length(filePaths)
     % p.s. conda environment must be activated on matlab launch: 
     % conda activate TEE_MAPSE
     % matlab
-    system(sprintf('python /home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Code/pipeline3D.py RotatedVolumes %s %0.2f %s', filesPath, thresholdCenter, modelPath));
+    system(sprintf('python /home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Code/pipeline3D.py RotatedYVolumes %s %0.2f %s', filesPath, thresholdCenter, modelPath));
+    
+     %% Run python script with DNN model finding MAPSE landmarks in all x-axis rotated
+    % slices from volumes in folder
 
-    %% Save image of y-axis rotated slices with landmarks
-    disp('Save images of y-axis rotated slices with landmarks');
+    disp('Run DNN model to find MAPSE landmarks in x-axis rotated slices (python)');
 
-    SaveSliceImageWithLandmarksHdf(fileNames, 'RotatedVolumes');
+    % p.s. conda environment must be activated on matlab launch: 
+    % conda activate TEE_MAPSE
+    % matlab
+    system(sprintf('python /home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_mapse/Code/pipeline3D.py RotatedXVolumes %s %0.2f %s', filesPath, thresholdCenter, modelPath));
+
+    %% Save image of xy-axis rotated slices with landmarks
+    disp('Save images of xy-axis rotated slices with landmarks');
+
+    SaveSliceImageWithLandmarksHdf(fileNames, 'RotatedYVolumes', startAngleCenter, endAngleCenter, stepDegreeCenter);
+    SaveSliceImageWithLandmarksHdf(fileNames, 'RotatedXVolumes', startAngleCenter, endAngleCenter, stepDegreeCenter);
+    
+    %% Inverse transform annulus landmarks and estimate mv center
+    disp('MV center estimate');
+    
+    MitralValveCenterEstimation(fileNames, startAngleCenter, endAngleCenter, stepDegreeCenter)
 
     %% Find optimal angle for mitral valve center computation
     disp('Find optimal y-axis rotation angle');
 
     %optimal angle = rotation angle with mapse landmarks furthest apart
-    OptimalMapseAngles(fileNames, filesPath);
+    %OptimalMapseAngles(fileNames, filesPath, startAngleCenter, endAngleCenter, stepDegreeCenter);
 
     %% Rotate around mv center
     disp('Rotate volume around MV center');
@@ -138,7 +157,7 @@ for i = 1 : length(filePaths)
     disp('Save images of slices rotated around MV center');
 
     %save image
-    SaveSliceImageHdf(fileNames, 'MVCenterRotatedVolumes');
+    SaveSliceImageHdf(fileNames, 'MVCenterRotatedVolumes', startAngleRotate, endAngleRotate, stepDegreeRotate);
 
     %% Run python script with DNN model finding MAPSE landmarks in all mv-center rotated
     % slices from volumes in folder
@@ -153,7 +172,7 @@ for i = 1 : length(filePaths)
     %% Save image of mv-center rotated slices with landmarks
     disp('Save images of mv center rotated slices with landmarks');
 
-    %SaveSliceImageWithLandmarksHdf(fileNames, 'MVCenterRotatedVolumes');
+    SaveSliceImageWithLandmarksHdf(fileNames, 'MVCenterRotatedVolumes', startAngleRotate, endAngleRotate, stepDegreeRotate);
     
     %% Classify the view of all images rotated around the mv-center
     disp('View classification of all images rotated about the mv-center');
@@ -164,11 +183,11 @@ for i = 1 : length(filePaths)
     % p.s. conda environment must be activated on matlab launch: 
     % conda activate TEE_MAPSE
     % matlab
-    system(sprintf('python /home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Code/pipeline3D.py %s', model_name));
+    %system(sprintf('python /home/anderstask1/Documents/Kyb/Thesis/TEE_MAPSE/dl_cardiac-view-classification/Code/pipeline3D.py %s', model_name));
     
     %% Plot classification as a function of rotation degree
     
-    PlotCardiacClassOfRotation(fileNames);
+    %PlotCardiacClassOfRotation(fileNames);
     
     %% Run python script to annotate landmarks
     disp('Run annotations script from python on MV center rotated slices (python)');
@@ -181,46 +200,46 @@ for i = 1 : length(filePaths)
     %% Inverse Transformation of Landmarks
     disp('Inverse transformation of landmarks to 3D');
 
-    InverseTransformationLandmarks3D(fileNames, 0, 360);
+    InverseTransformationLandmarks3D(fileNames, startAngleRotate, endAngleRotate, stepDegreeRotate);
 
     %% Landmark selection based on view class
     disp('Group landmark based on classified cardiac view, to compute regional 2C, 4C and ALAX MAPSE');
     
-    LandmarkCardiacViewSelection(fileNames);
+    %LandmarkCardiacViewSelection(fileNames);
     
     %% Interpolation - outlier rejection - mean left&right landmarks
     disp('Landmarks Post-Processing');
 
     PostProcessLandmarks3D(fileNames, 'all-views');
-    PostProcessLandmarks3D(fileNames, '4C');
-    PostProcessLandmarks3D(fileNames, '2C');
-    PostProcessLandmarks3D(fileNames, 'ALAX');
+    %PostProcessLandmarks3D(fileNames, '4C');
+    %PostProcessLandmarks3D(fileNames, '2C');
+    %PostProcessLandmarks3D(fileNames, 'ALAX');
 
     %% MAPSE processing
     disp('Compute MAPSE values (plot mapse curve) (annulus render)');
 
     PostProcessMapse3D(fileNames, 'all-views');
-    PostProcessMapse3D(fileNames, '4C');
-    PostProcessMapse3D(fileNames, '2C');
-    PostProcessMapse3D(fileNames, 'ALAX');
+    %PostProcessMapse3D(fileNames, '4C');
+    %PostProcessMapse3D(fileNames, '2C');
+    %PostProcessMapse3D(fileNames, 'ALAX');
 
     %% Save MAPSE results
     disp('Save MAPSE value results in table as a text file')
 
     SaveMapseValuesTxtFile(filesPath, 'all-views');
-    SaveMapseValuesTxtFile(filesPath, '4C');
-    SaveMapseValuesTxtFile(filesPath, '2C');
-    SaveMapseValuesTxtFile(filesPath, 'ALAX');
+    %SaveMapseValuesTxtFile(filesPath, '4C');
+    %SaveMapseValuesTxtFile(filesPath, '2C');
+    %SaveMapseValuesTxtFile(filesPath, 'ALAX');
     %SaveMapseToCSV(filesPath);
 
     %% Plot statistics
     disp('Create plots of results from statistics')
 
     %LEFT
-    StatisticalResultPlots(fileNames, filesPath, 'mapse_raw_left_map', 'mapse_mean_reference_map', 'landmarkLeft3DMatrix', 'annotatedLeft3DMatrix');
+    StatisticalResultPlots(fileNames, filesPath, 'all-views', 'mapse_raw_left_map', 'mapse_mean_reference_map', 'landmarkLeft3DMatrix', 'annotatedLeft3DMatrix');
 
     %% RIGHT
-    StatisticalResultPlots(fileNames, filesPath, 'mapse_raw_right_map', 'mapse_mean_reference_map', 'landmarkRight3DMatrix', 'annotatedRight3DMatrix');
+    StatisticalResultPlots(fileNames, filesPath, 'all-views', 'mapse_raw_right_map', 'mapse_mean_reference_map', 'landmarkRight3DMatrix', 'annotatedRight3DMatrix');
 
     %% LEFT
     %StatisticalResultPlots(fileNames, filesPath, 'mapse_bezier_left_map', 'mapse_mean_reference_map', 'leftLandmarkBezierCurve', 'annotatedLeftBezierCurve');
@@ -240,7 +259,7 @@ for i = 1 : length(filePaths)
     %% Plot mitral annulus 3D
     disp('Create plots for all files in directory')
 
-    %MitralAnnulus3DRendering(fileNames, 'all-views');
+    MitralAnnulus3DRendering(fileNames, 'all-views');
 
     %% Show plot from all files
     disp('Show selected plots')
@@ -251,7 +270,8 @@ for i = 1 : length(filePaths)
     % _frame_1_spline_interpolation-plot3D_with_slices
     % _spline_interpolation-plot3D_left_all-frames
     % _frame_1_mean_scatter_spline_bezier_3D_with_slices
-    %MitralAnnulus3DPlot(fileNames, {'_frame_1_spline_interpolation-plot3D_with_slices'});
+    %_frame_1_scatterfig_xy_rotation
+    MitralAnnulus3DPlot(fileNames, {'_frame_1_scatterfig_xy_rotation'});
     
     %% Compute area of mitral valve
     

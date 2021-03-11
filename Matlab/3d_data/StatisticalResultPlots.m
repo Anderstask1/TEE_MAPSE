@@ -1,7 +1,7 @@
 %Statistical plot of results
 %Anders Tasken
 %Created 21.11. 2020
-function StatisticalResultPlots(fileNames, filesPath, mapse_map_name, mapse_reference_map_name, landmark3DMatrix_name, landmarkAnnotated3DMatrix_name)
+function StatisticalResultPlots(fileNames, filesPath, cardiac_view, mapse_map_name, mapse_reference_map_name, landmark3DMatrix_name, landmarkAnnotated3DMatrix_name)
     
     %% Colors
     blueColor = [0, 0.4470, 0.7410];
@@ -14,7 +14,7 @@ function StatisticalResultPlots(fileNames, filesPath, mapse_map_name, mapse_refe
     grayColor = [17 17 17]/255;
     
     %% Load landmark variable matrices
-    variablesFilename = strcat(filesPath, 'LandmarkMatricesVariables/MapseAndErrorMaps');
+    variablesFilename = strcat(filesPath, 'LandmarkMatricesVariables/MapseAndErrorMaps_', cardiac_view);
     mapse_map = load(variablesFilename,mapse_map_name).(mapse_map_name);
     
     variablesFilename = strcat(filesPath, 'LandmarkMatricesVariables/MapseReferenceMaps');
